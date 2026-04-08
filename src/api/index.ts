@@ -56,7 +56,7 @@ class Api {
       .post("/rest/servicedesk/1/customer/models", body)
       .then((res) => res.data);
 
-    return data.reqDetails.issue.id;
+    return data.reqDetails.issue;
   }
 
   static async BuscarDadosExpandidos(id: ItemTabela["id"]) {

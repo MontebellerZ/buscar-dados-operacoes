@@ -2,6 +2,7 @@ import { ItemTabela } from "../types";
 import envData from "../config/envData";
 import Api from "../api";
 import atribuirDadosExpandidos from "./atribuirDadosExpandidos";
+import atribuirDadosIssue from "./atribuirDadosIssue";
 
 async function processarIssues(itens: ItemTabela[]) {
   const { workers } = envData;
@@ -21,15 +22,17 @@ async function processarIssues(itens: ItemTabela[]) {
       indexAtual++;
 
       try {
-        item.id = await Api.BuscarIssueId(item.key);
+        const dadosIssue = await Api.BuscarIssueId(item.key);
 
-        const dados = await Api.BuscarDadosExpandidos(item.id);
+        atribuirDadosIssue(item, dadosIssue);
 
-        atribuirDadosExpandidos(item, dados);
+        const dadosExpandidos = await Api.BuscarDadosExpandidos(item.id);
+
+        atribuirDadosExpandidos(item, dadosExpandidos);
 
         completas++;
         console.info(
-          `Issue processada ${item.key} (${completas} de ${itens.length}) // worker ${id}`,
+          `Processado ${item.key} (${completas} de ${itens.length}) // worker ${id}`,
         );
       } catch (err) {
         erro = err;

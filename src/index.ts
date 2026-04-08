@@ -2,6 +2,7 @@ import salvarExcel from "./functions/salvarExcel";
 import logar from "./functions/logar";
 import processarIssues from "./functions/processarIssues";
 import Api from "./api";
+import ordenarIssues from "./functions/ordenarIssues";
 
 async function main() {
   console.info("Iniciando execução da automação.");
@@ -11,6 +12,8 @@ async function main() {
   const itens = await Api.BuscarListaIssues();
 
   await processarIssues(itens);
+
+  ordenarIssues(itens);
 
   salvarExcel(itens);
 

@@ -1,6 +1,7 @@
 export type ItemTabela = {
   key: string;
   id?: number;
+  date?: Date;
   nomeCliente?: string;
   nomeMotorista?: string;
   cpfMotorista?: string;

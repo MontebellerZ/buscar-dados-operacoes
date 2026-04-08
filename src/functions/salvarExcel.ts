@@ -6,7 +6,8 @@ function salvarExcel(itens: ItemTabela[]): void {
 
   const linhas: string[][] = [
     [
-      "Id",
+      "Chave",
+      "Data e Hora",
       "Nome do Cliente",
       "Nome do Motorista",
       "CPF do Motorista",
@@ -23,6 +24,7 @@ function salvarExcel(itens: ItemTabela[]): void {
   for (const item of itens) {
     linhas.push([
       item.key,
+      item.date?.toLocaleString() ?? "",
       item.nomeCliente ?? "",
       item.nomeMotorista ?? "",
       item.cpfMotorista ?? "",
