@@ -6,5 +6,9 @@ export type ItemTabela = {
   cpfMotorista?: string;
   origemDestino?: string;
   placas?: string;
-  observacoes?: string;
+  nf?: string;
+  pedido?: string;
+  calculoFrete?: string;
+  qtdePlts?: string;
+  freteLiquido?: string;
 };

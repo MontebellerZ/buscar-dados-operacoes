@@ -1,6 +1,7 @@
 import { ItemTabela } from "../types";
 import envData from "../config/envData";
 import Api from "../api";
+import atribuirDadosExpandidos from "./atribuirDadosExpandidos";
 
 async function processarIssues(itens: ItemTabela[]) {
   const { workers } = envData;
@@ -24,14 +25,7 @@ async function processarIssues(itens: ItemTabela[]) {
 
         const dados = await Api.BuscarDadosExpandidos(item.id);
 
-        item.nomeCliente = dados.customfield_10107.value.text;
-        item.nomeMotorista = dados.customfield_11769.value.text;
-        item.cpfMotorista = dados.customfield_12209.value.text;
-        item.origemDestino = dados.customfield_12186.value.text;
-        item.placas = dados.customfield_11590.value.text;
-        item.observacoes = dados.customfield_12222.value.adf.content
-          .flatMap((f) => f.content?.map((f) => f.text).filter(Boolean))
-          .join(" | ");
+        atribuirDadosExpandidos(item, dados);
 
         completas++;
         console.info(

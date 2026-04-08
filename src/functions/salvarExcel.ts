@@ -12,7 +12,11 @@ function salvarExcel(itens: ItemTabela[]): void {
       "CPF do Motorista",
       "Origem e Destino",
       "Placas",
-      "Observações",
+      "NF",
+      "Pedido",
+      "Cálculo de Frete",
+      "Qtde/Plts",
+      "Frete Líquido / MP PREFORMA",
     ],
   ];
 
@@ -24,7 +28,11 @@ function salvarExcel(itens: ItemTabela[]): void {
       item.cpfMotorista ?? "",
       item.origemDestino ?? "",
       item.placas ?? "",
-      item.observacoes ?? "",
+      item.nf ?? "",
+      item.pedido ?? "",
+      item.calculoFrete ?? "",
+      item.qtdePlts ?? "",
+      item.freteLiquido ?? "",
     ]);
   }
 
