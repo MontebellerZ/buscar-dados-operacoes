@@ -4,6 +4,7 @@ const getEnv = {
   USUARIO: process.env.USUARIO,
   SENHA: process.env.SENHA,
   URL: process.env.URL,
+  BASE_URL: process.env.BASE_URL,
   WORKERS: process.env.WORKERS ? +process.env.WORKERS : 5,
 };
 
@@ -19,6 +20,7 @@ const envData = {
   usuario: getEnv.USUARIO!,
   senha: getEnv.SENHA!,
   url: getEnv.URL!,
+  baseUrl: getEnv.BASE_URL!,
   workers: getEnv.WORKERS,
 };
 

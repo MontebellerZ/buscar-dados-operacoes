@@ -5,10 +5,12 @@
   "author": "Filipe Montebeller Rocha",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts",
+    "teste": "ts-node src/teste.ts"
   },
   "dependencies": {
     "@types/node": "^25.5.2",
+    "axios": "^1.15.0",
     "dotenv": "^17.4.1",
     "puppeteer": "^24.40.0",
     "ts-node": "^10.9.2",
