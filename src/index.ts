@@ -1,26 +1,20 @@
 import salvarExcel from "./functions/salvarExcel";
-import obterLinksDaTabela from "./functions/obterLinksDaTabela";
-import carregarScrollLista from "./functions/carregarScrollLista";
 import logar from "./functions/logar";
-import processarLinks from "./functions/processarLinks";
-import criarJanela from "./functions/criarJanela";
+import processarIssues from "./functions/processarIssues";
+import Api from "./api";
 
 async function main() {
-  const { browser, page } = await criarJanela();
+  console.info("Iniciando execução da automação.");
 
-  try {
-    await logar(page);
+  await logar();
 
-    await carregarScrollLista(page);
+  const itens = await Api.BuscarListaIssues();
 
-    const itensTabela = await obterLinksDaTabela(page);
+  await processarIssues(itens);
 
-    await processarLinks(browser, page.url(), itensTabela);
+  salvarExcel(itens);
 
-    salvarExcel(itensTabela);
-  } finally {
-    await browser.close();
-  }
+  console.info("Automação finalizada com sucesso.");
 }
 
-main().catch((error) => console.error("Falha na automacao:", error));
+main().catch((error) => console.error("Falha na automação:", error));

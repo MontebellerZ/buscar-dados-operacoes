@@ -1,8 +1,5 @@
 import Api from "./api";
 
-async function teste() {
-  const res = await Api.Login();
-  console.log(res);
-}
+async function teste() {}
 
 teste().catch((err) => console.error(err));

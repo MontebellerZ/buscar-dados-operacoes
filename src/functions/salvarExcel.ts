@@ -2,6 +2,8 @@ import { ItemTabela } from "../types";
 import XLSX from "xlsx";
 
 function salvarExcel(itens: ItemTabela[]): void {
+  console.info("Gerando conteúdo da planilha");
+
   const linhas: string[][] = [
     [
       "Id",
@@ -16,20 +18,24 @@ function salvarExcel(itens: ItemTabela[]): void {
 
   for (const item of itens) {
     linhas.push([
-      item.id,
-      item.nomeCliente,
-      item.nomeMotorista,
-      item.cpfMotorista,
-      item.origemDestino,
-      item.placas,
-      item.observacoes,
+      item.key,
+      item.nomeCliente ?? "",
+      item.nomeMotorista ?? "",
+      item.cpfMotorista ?? "",
+      item.origemDestino ?? "",
+      item.placas ?? "",
+      item.observacoes ?? "",
     ]);
   }
+
+  console.info("Criando nova planilha.");
 
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.aoa_to_sheet(linhas);
   XLSX.utils.book_append_sheet(workbook, worksheet, "Operacoes");
   XLSX.writeFile(workbook, "dados-operacoes.xlsx");
+
+  console.info("Planilha salva com sucesso.");
 }
 
 export default salvarExcel;
