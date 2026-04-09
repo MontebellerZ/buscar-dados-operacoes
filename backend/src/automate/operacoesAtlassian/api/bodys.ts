@@ -1,4 +1,4 @@
-import { ItemTabela } from "../../../types/ItemTabela.type";
+import { Operacao } from "../../../types/Operacao.type";
 
 class ApiBody {
   static buscarListaIssues = (nextToken?: string) => ({
@@ -16,7 +16,7 @@ class ApiBody {
     models: ["allReqFilter", "xsrfToken"],
   });
 
-  static buscarIssueId = (key: ItemTabela["key"]) => ({
+  static buscarIssueId = (key: Operacao["key"]) => ({
     options: {
       reqDetails: { key: key },
       portalId: 289,

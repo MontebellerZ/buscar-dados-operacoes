@@ -1,10 +1,10 @@
-import { ItemTabela } from "../../../types/ItemTabela.type";
+import { Operacao } from "../../../types/Operacao.type";
 import envData from "../../../config/envData";
 import Api from "../api";
 import atribuirDadosExpandidos from "./atribuirDadosExpandidos";
 import atribuirDadosIssue from "./atribuirDadosIssue";
 
-async function processarIssues(itens: ItemTabela[]) {
+async function processarIssues(itens: Operacao[]) {
   const { workers } = envData;
 
   const totalWorkers = Math.max(1, Math.min(workers, itens.length || 1));

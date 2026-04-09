@@ -1,8 +1,8 @@
 import { ResponseBuscarIssueId } from "../api/responses";
-import { ItemTabela } from "../../../types/ItemTabela.type";
+import { Operacao } from "../../../types/Operacao.type";
 
 function atribuirDadosIssue(
-  item: ItemTabela,
+  item: Operacao,
   dados: ResponseBuscarIssueId["reqDetails"]["issue"],
 ) {
   item.id = dados.id;

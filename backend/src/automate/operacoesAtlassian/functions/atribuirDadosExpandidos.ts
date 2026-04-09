@@ -1,5 +1,5 @@
 import { ResponseBuscarDadosExpandidos } from "../api/responses";
-import { ItemTabela } from "../../../types/ItemTabela.type";
+import { Operacao } from "../../../types/Operacao.type";
 
 function extrairDadosAdf(
   content: ResponseBuscarDadosExpandidos["customfield_12222"]["value"]["adf"]["content"] = [],
@@ -21,7 +21,7 @@ function pickDadosAdf(dados: ReturnType<typeof extrairDadosAdf>, key: string) {
   return dados.find((d) => d.key === key)?.value;
 }
 
-function atribuirDadosExpandidos(item: ItemTabela, dados: ResponseBuscarDadosExpandidos) {
+function atribuirDadosExpandidos(item: Operacao, dados: ResponseBuscarDadosExpandidos) {
   item.nomeCliente = dados.customfield_10107.value.text;
   item.nomeMotorista = dados.customfield_11769.value.text;
   item.cpfMotorista = dados.customfield_12209.value.text;

@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS Operacoes (
   validado INTEGER NOT NULL DEFAULT 0,
   ativo INTEGER NOT NULL DEFAULT 1,
   criadoEm TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  atualizadoEm TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizadoEm TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 -- Trigger para atualizar automaticamente o campo 'atualizadoEm' na tabela Operacoes
 CREATE TRIGGER IF NOT EXISTS update_operacoes_timestamp

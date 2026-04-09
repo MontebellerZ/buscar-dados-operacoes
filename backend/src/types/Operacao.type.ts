@@ -1,4 +1,4 @@
-export type ItemTabela = {
+export type Operacao = {
   key: string;
   id?: number;
   date?: Date;
