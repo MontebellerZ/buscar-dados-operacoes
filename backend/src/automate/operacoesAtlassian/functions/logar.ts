@@ -2,6 +2,7 @@ import envData from "../../../config/envData";
 import criarJanela from "./criarJanela";
 import Api from "../api";
 import selectors from "../consts/selectors";
+import { NotAuthorizedError } from "../../../api/errors/errors";
 
 async function logar(email: string, senha: string) {
   const { url } = envData;
@@ -28,14 +29,14 @@ async function logar(email: string, senha: string) {
         page.click(selectors.loginButton),
       ]);
     } catch {
-      throw new Error("Credenciais inválidas.");
+      throw new NotAuthorizedError("Credenciais inválidas.");
     }
 
     const cookies = await browser.cookies();
 
     const relavantCookies = ["customer.account.session.token", "atlassian.xsrf.token"];
     if (!relavantCookies.every((r) => cookies.find((c) => r === c.name))) {
-      throw new Error("Credenciais inválidas.");
+      throw new NotAuthorizedError("Credenciais inválidas.");
     }
 
     console.info("Logado com sucesso.");
@@ -43,10 +44,6 @@ async function logar(email: string, senha: string) {
     Api.SetCookie(cookies);
 
     console.info("Cookies definidos.");
-
-    return true;
-  } catch (err) {
-    return false;
   } finally {
     await page.close();
     await browser.close();
