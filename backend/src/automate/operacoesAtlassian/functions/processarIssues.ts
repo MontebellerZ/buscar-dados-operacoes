@@ -1,4 +1,4 @@
-import { Operacao } from "../../../types/Operacao.type";
+import { Operacao } from "../../../types/operacao.type";
 import envData from "../../../config/envData";
 import Api from "../api";
 import atribuirDadosExpandidos from "./atribuirDadosExpandidos";

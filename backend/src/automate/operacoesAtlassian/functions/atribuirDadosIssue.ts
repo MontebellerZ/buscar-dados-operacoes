@@ -1,5 +1,5 @@
 import { ResponseBuscarIssueId } from "../api/responses";
-import { Operacao } from "../../../types/Operacao.type";
+import { Operacao } from "../../../types/operacao.type";
 
 function atribuirDadosIssue(
   item: Operacao,

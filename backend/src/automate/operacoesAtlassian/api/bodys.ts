@@ -1,4 +1,4 @@
-import { Operacao } from "../../../types/Operacao.type";
+import { Operacao } from "../../../types/operacao.type";
 
 class ApiBody {
   static buscarListaIssues = (nextToken?: string) => ({

@@ -1,5 +1,5 @@
 import envData from "../../../config/envData";
-import { Operacao } from "../../../types/Operacao.type";
+import { Operacao } from "../../../types/operacao.type";
 import XLSX from "xlsx";
 
 function salvarExcel(itens: Operacao[], outputPath?: string): void {

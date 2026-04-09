@@ -1,6 +1,5 @@
 import { Router } from "express";
-import logar from "../../automate/operacoesAtlassian/functions/logar";
-import { RequestUsuarioLogin } from "../types/request/RequestUsuarioLogin.type";
+import { RequestUsuarioLogin } from "../types/request/requestUsuarioLogin.type";
 import UsuarioService from "../services/usuario.service";
 
 const usuarioRoutes = Router();

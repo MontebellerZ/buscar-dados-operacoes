@@ -1,4 +1,4 @@
-import { Operacao } from "../../../types/Operacao.type";
+import { Operacao } from "../../../types/operacao.type";
 
 function ordenarIssues(itens: Operacao[]) {
   console.info("Ordenando as issues por data.");
