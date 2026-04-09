@@ -1,8 +1,8 @@
 import { Page } from "puppeteer";
-import envData from "../config/envData";
-import selectors from "../config/selectors";
+import envData from "../../../config/envData";
 import criarJanela from "./criarJanela";
 import Api from "../api";
+import selectors from "../consts/selectors";
 
 async function logar() {
   const { usuario, senha, url } = envData;

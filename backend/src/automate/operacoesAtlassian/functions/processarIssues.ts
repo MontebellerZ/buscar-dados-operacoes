@@ -1,5 +1,5 @@
-import { ItemTabela } from "../types";
-import envData from "../config/envData";
+import { ItemTabela } from "../types/ItemTabela.type";
+import envData from "../../../config/envData";
 import Api from "../api";
 import atribuirDadosExpandidos from "./atribuirDadosExpandidos";
 import atribuirDadosIssue from "./atribuirDadosIssue";

@@ -1,7 +1,7 @@
 import { Cookie } from "puppeteer";
-import envData from "../config/envData";
+import envData from "../../../config/envData";
 import { create } from "axios";
-import { ItemTabela } from "../types";
+import { ItemTabela } from "../types/ItemTabela.type";
 import ApiBody from "./bodys";
 import {
   ResponseBuscarDadosExpandidos,

@@ -1,5 +1,5 @@
 import { ResponseBuscarDadosExpandidos } from "../api/responses";
-import { ItemTabela } from "../types";
+import { ItemTabela } from "../types/ItemTabela.type";
 
 function extrairDadosAdf(
   content: ResponseBuscarDadosExpandidos["customfield_12222"]["value"]["adf"]["content"] = [],

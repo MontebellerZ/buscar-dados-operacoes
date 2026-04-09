@@ -4,7 +4,12 @@ import processarIssues from "./functions/processarIssues";
 import Api from "./api";
 import ordenarIssues from "./functions/ordenarIssues";
 
-async function main() {
+interface IOperacoesAtlassian {
+  gerarExcel?: boolean;
+  excelOutputPath?: string;
+}
+
+async function operacoesAtlassian(props?: IOperacoesAtlassian) {
   console.info("Iniciando execução da automação.");
 
   await logar();
@@ -15,9 +20,11 @@ async function main() {
 
   ordenarIssues(itens);
 
-  salvarExcel(itens);
+  if (props?.gerarExcel) salvarExcel(itens, props.excelOutputPath);
 
   console.info("Automação finalizada com sucesso.");
+
+  return itens;
 }
 
-main().catch((error) => console.error("Falha na automação:", error));
+export default operacoesAtlassian;

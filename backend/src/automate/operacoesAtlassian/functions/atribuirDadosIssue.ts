@@ -1,5 +1,5 @@
 import { ResponseBuscarIssueId } from "../api/responses";
-import { ItemTabela } from "../types";
+import { ItemTabela } from "../types/ItemTabela.type";
 
 function atribuirDadosIssue(
   item: ItemTabela,

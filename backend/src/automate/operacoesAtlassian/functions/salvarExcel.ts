@@ -1,5 +1,5 @@
-import envData from "../config/envData";
-import { ItemTabela } from "../types";
+import envData from "../../../config/envData";
+import { ItemTabela } from "../types/ItemTabela.type";
 import XLSX from "xlsx";
 
 function salvarExcel(itens: ItemTabela[], outputPath?: string): void {

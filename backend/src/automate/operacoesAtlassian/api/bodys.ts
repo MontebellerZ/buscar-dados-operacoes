@@ -1,4 +1,4 @@
-import { ItemTabela } from "../types";
+import { ItemTabela } from "../types/ItemTabela.type";
 
 class ApiBody {
   static buscarListaIssues = (nextToken?: string) => ({
