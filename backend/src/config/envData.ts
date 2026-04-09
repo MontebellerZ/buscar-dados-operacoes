@@ -5,6 +5,7 @@ const getEnv = {
   SENHA: process.env.SENHA,
   URL: process.env.URL,
   BASE_URL: process.env.BASE_URL,
+  API_PORT: process.env.API_PORT ? +process.env.API_PORT : 3001,
   WORKERS: process.env.WORKERS ? +process.env.WORKERS : 20,
   OUTPUT_PATH: process.env.OUTPUT_PATH ?? "dados-operacoes.xlsx",
 };
@@ -24,6 +25,7 @@ const envData = {
   baseUrl: getEnv.BASE_URL!,
   workers: getEnv.WORKERS,
   outputPath: getEnv.OUTPUT_PATH,
+  apiPort: getEnv.API_PORT,
 };
 
 export default envData;

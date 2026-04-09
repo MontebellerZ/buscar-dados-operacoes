@@ -1,3 +1,12 @@
-async function main() {}
+import express from "express";
+import envData from "./config/envData";
+import routes from "./routes";
 
-main().catch((error) => console.error("Falha na automação:", error));
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(routes);
+
+app.listen(envData.apiPort, () => console.info(`Rodando na porta ${envData.apiPort}`));

@@ -6,6 +6,9 @@
   "scripts": {
     "dev:front": "yarn --cwd frontend dev",
     "dev:back": "yarn --cwd backend dev",
-    "dev": "yarn dev:front && yarn dev:back"
+    "dev": "concurrently \"yarn dev:front\" \"yarn dev:back\""
+  },
+  "dependencies": {
+    "concurrently": "^9.2.1"
   }
 }

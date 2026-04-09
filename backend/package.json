@@ -5,15 +5,18 @@
   "author": "Filipe Montebeller Rocha",
   "license": "MIT",
   "scripts": {
-    "dev": "ts-node src/index.ts"
+    "dev": "nodemon src/index.ts",
+    "start": "ts-node src/index.ts"
   },
   "dependencies": {
     "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.6",
     "@types/node": "^25.5.2",
     "axios": "^1.15.0",
     "better-sqlite3": "^12.8.0",
     "dotenv": "^17.4.1",
     "express": "^5.2.1",
+    "nodemon": "^3.1.14",
     "puppeteer": "^24.40.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.2",
