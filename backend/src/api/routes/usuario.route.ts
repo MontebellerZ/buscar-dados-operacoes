@@ -7,7 +7,7 @@ const usuarioRoutes = Router();
 usuarioRoutes.post("/login", async (req, res) => {
   const { email, senha } = req.body as RequestUsuarioLogin;
 
-  UsuarioService.Login(email, senha);
+  await UsuarioService.Login(email, senha);
 
   res.send();
 });
