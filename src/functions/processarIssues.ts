@@ -12,9 +12,8 @@ async function processarIssues(itens: ItemTabela[]) {
   let completas = 0;
   let erro: any;
 
-  console.info(
-    `Total de issues a serem processadas: ${itens.length}.\nTotal de workers para a execução: ${totalWorkers}.`,
-  );
+  console.info(`Total de issues a serem processadas: ${itens.length}.`);
+  console.info(`Total de workers para a execução: ${totalWorkers}.`);
 
   const worker = async (id: number) => {
     while (!erro && indexAtual < itens.length) {
@@ -31,9 +30,7 @@ async function processarIssues(itens: ItemTabela[]) {
         atribuirDadosExpandidos(item, dadosExpandidos);
 
         completas++;
-        console.info(
-          `Processado ${item.key} (${completas} de ${itens.length}) // worker ${id}`,
-        );
+        console.info(`Processado ${item.key} (${completas} de ${itens.length}) // worker ${id}`);
       } catch (err) {
         erro = err;
         console.error(item.key, err);
@@ -44,7 +41,7 @@ async function processarIssues(itens: ItemTabela[]) {
 
   console.info("Iniciando processamento de issues.");
 
-  await Promise.all(Array.from({ length: totalWorkers }, (_, i) => worker(i)));
+  await Promise.all(Array.from({ length: totalWorkers }, (_, i) => worker(i + 1)));
 
   console.info(`Processamento de issues completo: ${completas} rastreadas.`);
 }

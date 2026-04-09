@@ -1,7 +1,8 @@
+import envData from "../config/envData";
 import { ItemTabela } from "../types";
 import XLSX from "xlsx";
 
-function salvarExcel(itens: ItemTabela[]): void {
+function salvarExcel(itens: ItemTabela[], outputPath?: string): void {
   console.info("Gerando conteúdo da planilha");
 
   const linhas: string[][] = [
@@ -41,7 +42,7 @@ function salvarExcel(itens: ItemTabela[]): void {
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.aoa_to_sheet(linhas);
   XLSX.utils.book_append_sheet(workbook, worksheet, "Operacoes");
-  XLSX.writeFile(workbook, "dados-operacoes.xlsx");
+  XLSX.writeFile(workbook, outputPath || envData.outputPath);
 
   console.info("Planilha salva com sucesso.");
 }
