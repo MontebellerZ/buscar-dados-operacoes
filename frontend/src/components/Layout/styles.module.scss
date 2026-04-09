@@ -3,4 +3,15 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
+
+  > hr {
+    width: 100%;
+    border: 0;
+    border-top: 1px solid rgba(var(--color-accent-mid-rgb), 0.24);
+    margin: 0.55rem 0;
+  }
+}
+
+.lockScroll {
+  overflow: hidden;
 }

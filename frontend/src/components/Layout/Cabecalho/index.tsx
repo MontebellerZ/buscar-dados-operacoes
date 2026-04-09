@@ -1,14 +1,18 @@
-import { Button } from "react-bootstrap";
 import styles from "./styles.module.scss";
 import { IoMenu } from "react-icons/io5";
 
-function Cabecalho() {
+type ICabecalho = {
+  onOpenMenu: () => void;
+};
+
+function Cabecalho(props: ICabecalho) {
   return (
     <section className={styles.header}>
       <div>
-        <Button variant="outline-secondary">
-          <IoMenu />
-        </Button>
+        <button type="button" className={styles.menuButton} onClick={props.onOpenMenu}>
+          <IoMenu size={18} />
+          <span>Menu</span>
+        </button>
       </div>
 
       <div>
