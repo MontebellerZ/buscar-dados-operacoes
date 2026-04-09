@@ -1,4 +1,4 @@
-import { ItemTabela } from "../types/ItemTabela.type";
+import { ItemTabela } from "../../../types/ItemTabela.type";
 import envData from "../../../config/envData";
 import Api from "../api";
 import atribuirDadosExpandidos from "./atribuirDadosExpandidos";

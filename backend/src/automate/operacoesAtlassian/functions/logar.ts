@@ -1,43 +1,58 @@
-import { Page } from "puppeteer";
 import envData from "../../../config/envData";
 import criarJanela from "./criarJanela";
 import Api from "../api";
 import selectors from "../consts/selectors";
 
-async function logar() {
-  const { usuario, senha, url } = envData;
-  
+async function logar(email: string, senha: string) {
+  const { url } = envData;
+
   console.info("Abrindo navegador para login.");
 
   const { browser, page } = await criarJanela();
-  
-  console.info("Preenchendo dados do usuário.");
 
-  await page.goto(url, { waitUntil: "networkidle2" });
+  try {
+    console.info("Preenchendo dados do usuário.");
 
-  await page.waitForSelector(selectors.userEmailInput, { timeout: 30000 });
-  await page.type(selectors.userEmailInput, usuario);
-  await page.click(selectors.loginButton);
+    await page.goto(url, { waitUntil: "networkidle2" });
 
-  await page.waitForSelector(selectors.userPasswordInput, { timeout: 30000 });
-  await page.type(selectors.userPasswordInput, senha);
+    try {
+      await page.waitForSelector(selectors.userEmailInput, { timeout: 2000 });
+      await page.type(selectors.userEmailInput, email);
+      await page.click(selectors.loginButton);
 
-  await Promise.all([
-    page.waitForNavigation({ waitUntil: "networkidle2", timeout: 60000 }),
-    page.click(selectors.loginButton),
-  ]);
+      await page.waitForSelector(selectors.userPasswordInput, { timeout: 2000 });
+      await page.type(selectors.userPasswordInput, senha);
 
-  console.info("Logado com sucesso.");
+      await Promise.all([
+        page.waitForNavigation({ waitUntil: "networkidle2", timeout: 10000 }),
+        page.click(selectors.loginButton),
+      ]);
+    } catch {
+      throw new Error("Credenciais inválidas.");
+    }
 
-  const cookies = await browser.cookies();
-  Api.SetCookie(cookies);
-  
-  console.info("Cookies definidos.");
+    const cookies = await browser.cookies();
 
-  await page.close();
-  await browser.close();
-  
-  console.info("Navegador encerrado.");
+    const relavantCookies = ["customer.account.session.token", "atlassian.xsrf.token"];
+    if (!relavantCookies.every((r) => cookies.find((c) => r === c.name))) {
+      throw new Error("Credenciais inválidas.");
+    }
+
+    console.info("Logado com sucesso.");
+
+    Api.SetCookie(cookies);
+
+    console.info("Cookies definidos.");
+
+    return true;
+  } catch (err) {
+    return false;
+  } finally {
+    await page.close();
+    await browser.close();
+
+    console.info("Navegador encerrado.");
+  }
 }
 
 export default logar;

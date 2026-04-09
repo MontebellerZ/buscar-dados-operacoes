@@ -1,5 +1,4 @@
 import salvarExcel from "./functions/salvarExcel";
-import logar from "./functions/logar";
 import processarIssues from "./functions/processarIssues";
 import Api from "./api";
 import ordenarIssues from "./functions/ordenarIssues";
@@ -11,8 +10,6 @@ interface IOperacoesAtlassian {
 
 async function operacoesAtlassian(props?: IOperacoesAtlassian) {
   console.info("Iniciando execução da automação.");
-
-  await logar();
 
   const itens = await Api.BuscarListaIssues();
 

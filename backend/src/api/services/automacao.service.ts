@@ -1,4 +1,4 @@
-import operacoesAtlassian from "../automate/operacoesAtlassian";
+import operacoesAtlassian from "../../automate/operacoesAtlassian";
 import BaseService from "./base.service";
 
 class AutomacaoService extends BaseService {

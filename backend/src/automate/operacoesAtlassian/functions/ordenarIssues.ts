@@ -1,4 +1,4 @@
-import { ItemTabela } from "../types/ItemTabela.type";
+import { ItemTabela } from "../../../types/ItemTabela.type";
 
 function ordenarIssues(itens: ItemTabela[]) {
   console.info("Ordenando as issues por data.");
