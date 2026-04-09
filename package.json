@@ -1,23 +1,11 @@
 {
   "name": "buscar-dados-operacoes",
   "version": "1.0.0",
-  "main": "src/index.ts",
   "author": "Filipe Montebeller Rocha",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node src/index.ts",
-    "teste": "ts-node src/teste.ts"
-  },
-  "dependencies": {
-    "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^25.5.2",
-    "axios": "^1.15.0",
-    "better-sqlite3": "^12.8.0",
-    "dotenv": "^17.4.1",
-    "express": "^5.2.1",
-    "puppeteer": "^24.40.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^6.0.2",
-    "xlsx": "^0.18.5"
+    "dev:front": "yarn --cwd frontend dev",
+    "dev:back": "yarn --cwd backend dev",
+    "dev": "yarn dev:front && yarn dev:back"
   }
 }

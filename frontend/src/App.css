@@ -1,0 +1,13 @@
+html,
+body,
+#root {
+  padding: 0px;
+  margin: 0px;
+  height: 100dvh;
+  width: 100dvw;
+  overflow: hidden;
+}
+
+#root {
+  background-color: #d5ffff;
+}
