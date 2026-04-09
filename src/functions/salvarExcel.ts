@@ -15,7 +15,6 @@ function salvarExcel(itens: ItemTabela[]): void {
       "Placas",
       "NF",
       "Pedido",
-      "Cálculo de Frete",
       "Qtde/Plts",
       "Frete Líquido / MP PREFORMA",
     ],
@@ -32,7 +31,6 @@ function salvarExcel(itens: ItemTabela[]): void {
       item.placas ?? "",
       item.nf ?? "",
       item.pedido ?? "",
-      item.calculoFrete ?? "",
       item.qtdePlts ?? "",
       item.freteLiquido ?? "",
     ]);

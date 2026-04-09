@@ -9,7 +9,6 @@ export type ItemTabela = {
   placas?: string;
   nf?: string;
   pedido?: string;
-  calculoFrete?: string;
   qtdePlts?: string;
   freteLiquido?: string;
 };

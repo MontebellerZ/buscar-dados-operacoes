@@ -32,7 +32,6 @@ function atribuirDadosExpandidos(item: ItemTabela, dados: ResponseBuscarDadosExp
 
   item.nf = pickDadosAdf(linhasObservacao, "NF");
   item.pedido = pickDadosAdf(linhasObservacao, "Pedido");
-  item.calculoFrete = pickDadosAdf(linhasObservacao, "Calculo de Frete");
   item.qtdePlts = pickDadosAdf(linhasObservacao, "Qtde/Plts");
   item.freteLiquido = pickDadosAdf(linhasObservacao, "Frete Liquido / MP PREFORMA");
 }
