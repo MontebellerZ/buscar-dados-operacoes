@@ -6,7 +6,6 @@ const getEnv = {
   API_PORT: process.env.API_PORT ? +process.env.API_PORT : 3001,
   WEB_PORT: process.env.WEB_PORT ? +process.env.WEB_PORT : 5173,
   WORKERS: process.env.WORKERS ? +process.env.WORKERS : 20,
-  OUTPUT_PATH: process.env.OUTPUT_PATH ?? "dados-operacoes.xlsx",
   PROJECT_NAME: process.env.PROJECT_NAME,
 };
 
@@ -22,7 +21,6 @@ const envData = {
   url: getEnv.URL!,
   baseUrl: getEnv.BASE_URL!,
   workers: getEnv.WORKERS,
-  outputPath: getEnv.OUTPUT_PATH,
   apiPort: getEnv.API_PORT,
   webPort: getEnv.WEB_PORT,
   projectName: getEnv.PROJECT_NAME!,

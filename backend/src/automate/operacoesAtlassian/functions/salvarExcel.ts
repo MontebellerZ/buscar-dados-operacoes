@@ -1,8 +1,7 @@
-import envData from "../../../config/envData";
 import { TOperacaoAutomacao } from "../../../types/operacaoAutomacao.type";
 import XLSX from "xlsx";
 
-function salvarExcel(itens: TOperacaoAutomacao[], outputPath?: string): void {
+function salvarExcel(itens: TOperacaoAutomacao[], outputPath: string): void {
   console.info("Gerando conteúdo da planilha");
 
   const linhas: string[][] = [
@@ -42,7 +41,7 @@ function salvarExcel(itens: TOperacaoAutomacao[], outputPath?: string): void {
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.aoa_to_sheet(linhas);
   XLSX.utils.book_append_sheet(workbook, worksheet, "Operacoes");
-  XLSX.writeFile(workbook, outputPath || envData.outputPath);
+  XLSX.writeFile(workbook, outputPath);
 
   console.info("Planilha salva com sucesso.");
 }

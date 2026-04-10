@@ -1,8 +1,8 @@
-import type { TOperacao } from "../../types/operacoes.type";
+import type { TOperacao } from "../../types/operacao.type";
 import BaseStorage from "./base.store";
 
 export default class OperacaoStorage extends BaseStorage {
-  static readonly mapKey = "OperacoesStorage";
+  static readonly mapKey = "OperacaoStorage";
 
   static get() {
     return this.localGet();

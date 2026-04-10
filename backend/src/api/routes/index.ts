@@ -7,7 +7,7 @@ import { HttpError } from "../errors/errors";
 const routes = Router();
 
 routes.use("/automacao", automacaoRoutes);
-routes.use("/operacoes", operacaoRoutes);
+routes.use("/operacao", operacaoRoutes);
 routes.use("/usuario", usuarioRoutes);
 
 routes.use("/", (req, res) => res.send(`[${req.method} ${req.originalUrl}] ✅ Alive`));

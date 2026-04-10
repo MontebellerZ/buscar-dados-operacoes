@@ -15,6 +15,4 @@ export type TOperacao = {
   taxaMotorista?: number;
   validado: number;
   ativo: number;
-  criadoEm: Date;
-  atualizadoEm: Date;
 };

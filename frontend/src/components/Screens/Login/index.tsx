@@ -12,7 +12,7 @@ function Login() {
 
   const [email, setEmail] = useState(usuarioSalvo?.email ?? "");
   const [senha, setSenha] = useState(usuarioSalvo?.senha ?? "");
-  const [manter, setManter] = useState(false);
+  const [manter, setManter] = useState(!!usuarioSalvo);
   const [isLoading, setIsLoading] = useState(false);
 
   const submitLogin = async (event?: React.SubmitEvent<HTMLFormElement>) => {
