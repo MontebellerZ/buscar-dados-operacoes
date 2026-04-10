@@ -1,5 +1,5 @@
 import { Operacao } from "@prisma/client";
-import prisma from "../../db/prisma";
+import prisma from "../../../prisma";
 import { TOperacaoAutomacao } from "../../types/operacaoAutomacao.type";
 
 class OperacaoRepository {

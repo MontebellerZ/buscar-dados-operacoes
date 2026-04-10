@@ -2,7 +2,7 @@ import express from "express";
 import envData from "./config/envData";
 import routes from "./api/routes";
 import cors from "cors";
-import "./db/prisma";
+import "../prisma";
 
 const app = express();
 

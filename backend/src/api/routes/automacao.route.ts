@@ -8,4 +8,21 @@ automacaoRoutes.post("/operacoesAtlassian", async (_, res) => {
   res.send(result);
 });
 
+automacaoRoutes.get("/all", async (_, res) => {
+  const result = await AutomacaoService.GetAll();
+  res.send(result);
+});
+
+automacaoRoutes.get("/all/:nome", async (req, res) => {
+  const nome = req.params.nome;
+  const result = await AutomacaoService.GetAllByNome(nome);
+  res.send(result);
+});
+
+automacaoRoutes.get("/last/:nome", async (req, res) => {
+  const nome = req.params.nome;
+  const result = await AutomacaoService.GetLastByNome(nome);
+  res.send(result);
+});
+
 export default automacaoRoutes;

@@ -1,5 +1,5 @@
 import { defineConfig } from "prisma/config";
-import gerarCaminhoBanco from "./src/db/gerarCaminhoBanco";
+import gerarCaminhoBanco from "./prisma/gerarCaminhoBanco";
 
 const { dbUrl } = gerarCaminhoBanco();
 

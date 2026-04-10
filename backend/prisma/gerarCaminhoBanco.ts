@@ -1,7 +1,7 @@
 import os from "os";
 import path from "path";
 import fs from "fs";
-import envData from "../config/envData";
+import envData from "../src/config/envData";
 
 function gerarCaminhoBanco() {
   const appDir = path.join(os.homedir(), "AppData", "Roaming", envData.projectName);
