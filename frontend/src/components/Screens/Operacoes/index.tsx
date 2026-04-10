@@ -1,7 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
-import { IoEyeOutline, IoPlayOutline, IoTrashOutline } from "react-icons/io5";
+import {
+  IoEllipsisHorizontalSharp,
+  IoEyeOutline,
+  IoPlayOutline,
+  IoTrashOutline,
+} from "react-icons/io5";
 import type { TOperacao } from "../../../types/operacao.type";
 import OperacaoService from "../../../services/operacao.service";
 import AutomacaoService from "../../../services/automacao.service";
@@ -70,6 +75,7 @@ function renderCell(operacao: TOperacao, columnKey: string) {
 function Operacoes() {
   const navigate = useNavigate();
   const { id } = useParams();
+  const columnSelectorRef = useRef<HTMLDivElement | null>(null);
 
   const [operacoes, setOperacoes] = useState<TOperacao[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -77,7 +83,9 @@ function Operacoes() {
   const [lastRunAt, setLastRunAt] = useState<string | null>(null);
   const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
   const [deleteCandidate, setDeleteCandidate] = useState<TOperacao | null>(null);
-  const [columns, setColumns] = useState<string[]>(() => TabelaStorage.getByTabela(TABLE_KEY) || DEFAULT_COLUMNS);
+  const [columns, setColumns] = useState<string[]>(
+    () => TabelaStorage.getByTabela(TABLE_KEY) || DEFAULT_COLUMNS,
+  );
 
   const selectedOperacao = useMemo(() => {
     if (!id) return null;
@@ -126,6 +134,22 @@ function Operacoes() {
     TabelaStorage.saveByTabela(TABLE_KEY, visibleColumns.length ? visibleColumns : DEFAULT_COLUMNS);
   }, [visibleColumns]);
 
+  useEffect(() => {
+    if (!isColumnMenuOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!columnSelectorRef.current?.contains(event.target as Node)) {
+        setIsColumnMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isColumnMenuOpen]);
+
   const toggleColumn = (columnKey: string) => {
     setColumns((prev) => {
       if (prev.includes(columnKey)) {
@@ -171,7 +195,7 @@ function Operacoes() {
         <div>
           <h1>Operações</h1>
           <p>
-            Última execução da automação <strong>operacoesAtlassian</strong>: {" "}
+            Última execução da automação <strong>operacoesAtlassian</strong>:{" "}
             {lastRunAt ? parseDate(lastRunAt) : "Ainda não executada"}
           </p>
         </div>
@@ -181,27 +205,6 @@ function Operacoes() {
             <IoPlayOutline />
             {isRunningAutomation ? "Executando..." : "Rodar automação"}
           </button>
-
-          <div className={styles.columnSelector}>
-            <button type="button" onClick={() => setIsColumnMenuOpen((prev) => !prev)}>
-              Colunas
-            </button>
-
-            {isColumnMenuOpen && (
-              <div className={styles.columnMenu}>
-                {COLUMN_DEFS.map((column) => (
-                  <label key={column.key}>
-                    <input
-                      type="checkbox"
-                      checked={visibleColumns.includes(column.key)}
-                      onChange={() => toggleColumn(column.key)}
-                    />
-                    {column.label}
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       </header>
 
@@ -214,7 +217,9 @@ function Operacoes() {
             <p>Origem/Destino: {selectedOperacao.origemDestino}</p>
           </div>
 
-          <button type="button" onClick={() => navigate("/main/operacoes")}>Fechar detalhe</button>
+          <button type="button" onClick={() => navigate("/main/operacoes")}>
+            Fechar detalhe
+          </button>
         </article>
       )}
 
@@ -223,9 +228,37 @@ function Operacoes() {
           <thead>
             <tr>
               {visibleColumns.map((column) => (
-                <th key={column}>{COLUMN_DEFS.find((item) => item.key === column)?.label || column}</th>
+                <th key={column}>
+                  {COLUMN_DEFS.find((item) => item.key === column)?.label || column}
+                </th>
               ))}
-              <th className={styles.actionsColumn}>Ações</th>
+              <th className={styles.actionsColumn}>
+                <div className={styles.columnSelector} ref={columnSelectorRef}>
+                  <button
+                    type="button"
+                    title="Selecionar colunas"
+                    aria-label="Selecionar colunas"
+                    onClick={() => setIsColumnMenuOpen((prev) => !prev)}
+                  >
+                    <IoEllipsisHorizontalSharp />
+                  </button>
+
+                  {isColumnMenuOpen && (
+                    <div className={styles.columnMenu}>
+                      {COLUMN_DEFS.map((column) => (
+                        <label key={column.key}>
+                          <input
+                            type="checkbox"
+                            checked={visibleColumns.includes(column.key)}
+                            onChange={() => toggleColumn(column.key)}
+                          />
+                          {column.label}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </th>
             </tr>
           </thead>
 
@@ -254,21 +287,23 @@ function Operacoes() {
                   ))}
 
                   <td className={styles.actionsColumn}>
-                    <button
-                      type="button"
-                      title="Ver operação"
-                      onClick={() => navigate(`/main/operacoes/${operacao.id}`)}
-                    >
-                      <IoEyeOutline />
-                    </button>
+                    <div className={styles.rowActions}>
+                      <button
+                        type="button"
+                        title="Ver operação"
+                        onClick={() => navigate(`/main/operacoes/${operacao.id}`)}
+                      >
+                        <IoEyeOutline />
+                      </button>
 
-                    <button
-                      type="button"
-                      title="Excluir operação"
-                      onClick={() => setDeleteCandidate(operacao)}
-                    >
-                      <IoTrashOutline />
-                    </button>
+                      <button
+                        type="button"
+                        title="Excluir operação"
+                        onClick={() => setDeleteCandidate(operacao)}
+                      >
+                        <IoTrashOutline />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
