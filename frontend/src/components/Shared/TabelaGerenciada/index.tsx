@@ -3,28 +3,25 @@ import { IoEllipsisHorizontalSharp } from "react-icons/io5";
 import TabelaStorage from "../../../stores/store/tabela.store";
 import styles from "./styles.module.scss";
 
-export type TabelaGerenciadaColuna<T> = {
+export type TabelaGerenciadaColuna<T extends Record<string, unknown>> = {
   key: string;
   label: string;
   render?: (row: T) => React.ReactNode;
+  default?: boolean;
 };
 
-type TabelaGerenciadaProps<T> = {
+type TabelaGerenciadaProps<T extends Record<string, unknown>> = {
   tabelaKey: string;
-  columns: Array<TabelaGerenciadaColuna<T>>;
-  defaultVisibleColumns: string[];
+  columns: TabelaGerenciadaColuna<T>[];
   data: T[];
   isLoading?: boolean;
   emptyMessage?: string;
   loadingMessage?: string;
-  getRowKey: (row: T) => string | number;
-  renderCell?: (row: T, columnKey: string) => React.ReactNode;
   renderActions?: (row: T) => React.ReactNode;
+  allowColumnEdit?: boolean;
 };
 
-function defaultRenderCell<T>(row: T, columnKey: string) {
-  const value = (row as Record<string, unknown>)[columnKey];
-
+function defaultRenderCell(value: unknown) {
   if (value === null || value === undefined || value === "") {
     return "-";
   }
@@ -32,20 +29,24 @@ function defaultRenderCell<T>(row: T, columnKey: string) {
   return String(value);
 }
 
-function TabelaGerenciada<T>({
+function TabelaGerenciada<T extends Record<string, unknown>>({
   tabelaKey,
   columns,
-  defaultVisibleColumns,
   data,
   isLoading = false,
   emptyMessage = "Nenhum registro encontrado.",
   loadingMessage = "Carregando...",
-  getRowKey,
-  renderCell,
   renderActions,
+  allowColumnEdit = true,
 }: TabelaGerenciadaProps<T>) {
   const columnSelectorRef = useRef<HTMLDivElement | null>(null);
   const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+
+  const defaultVisibleColumns = useMemo(() => {
+    const flagged = columns.filter((column) => column.default).map((column) => column.key);
+    return flagged.length ? flagged : columns.map((column) => column.key);
+  }, [columns]);
+
   const [selectedColumns, setSelectedColumns] = useState<string[]>(
     () => TabelaStorage.getByTabela(tabelaKey) || defaultVisibleColumns,
   );
@@ -59,6 +60,13 @@ function TabelaGerenciada<T>({
     const safeColumns = visibleColumns.length ? visibleColumns : defaultVisibleColumns;
     TabelaStorage.saveByTabela(tabelaKey, safeColumns);
   }, [defaultVisibleColumns, tabelaKey, visibleColumns]);
+
+  useEffect(() => {
+    setSelectedColumns((prev) => {
+      const sanitized = prev.filter((columnKey) => columns.some((column) => column.key === columnKey));
+      return sanitized.length ? sanitized : defaultVisibleColumns;
+    });
+  }, [columns, defaultVisibleColumns]);
 
   useEffect(() => {
     if (!isColumnMenuOpen) return;
@@ -87,7 +95,19 @@ function TabelaGerenciada<T>({
     });
   };
 
-  const renderValue = renderCell || defaultRenderCell;
+  const resolveRowKey = (row: T, index: number) => {
+    if (typeof row.id === "number" || typeof row.id === "string") {
+      return row.id;
+    }
+
+    if (typeof row.key === "string" || typeof row.key === "number") {
+      return row.key;
+    }
+
+    return index;
+  };
+
+  const hasTrailingColumn = Boolean(renderActions) || allowColumnEdit;
 
   return (
     <div className={styles.tableWrapper}>
@@ -99,33 +119,37 @@ function TabelaGerenciada<T>({
               return <th key={columnKey}>{column?.label || columnKey}</th>;
             })}
 
-            {renderActions && (
+            {hasTrailingColumn && (
               <th className={styles.actionsColumn}>
-                <div className={styles.columnSelector} ref={columnSelectorRef}>
-                  <button
-                    type="button"
-                    title="Selecionar colunas"
-                    aria-label="Selecionar colunas"
-                    onClick={() => setIsColumnMenuOpen((prev) => !prev)}
-                  >
-                    <IoEllipsisHorizontalSharp />
-                  </button>
+                {allowColumnEdit ? (
+                  <div className={styles.columnSelector} ref={columnSelectorRef}>
+                    <button
+                      type="button"
+                      title="Selecionar colunas"
+                      aria-label="Selecionar colunas"
+                      onClick={() => setIsColumnMenuOpen((prev) => !prev)}
+                    >
+                      <IoEllipsisHorizontalSharp />
+                    </button>
 
-                  {isColumnMenuOpen && (
-                    <div className={styles.columnMenu}>
-                      {columns.map((column) => (
-                        <label key={column.key}>
-                          <input
-                            type="checkbox"
-                            checked={visibleColumns.includes(column.key)}
-                            onChange={() => toggleColumn(column.key)}
-                          />
-                          {column.label}
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                    {isColumnMenuOpen && (
+                      <div className={styles.columnMenu}>
+                        {columns.map((column) => (
+                          <label key={column.key}>
+                            <input
+                              type="checkbox"
+                              checked={visibleColumns.includes(column.key)}
+                              onChange={() => toggleColumn(column.key)}
+                            />
+                            {column.label}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  "Ações"
+                )}
               </th>
             )}
           </tr>
@@ -135,7 +159,7 @@ function TabelaGerenciada<T>({
           {!isLoading && data.length === 0 && (
             <tr>
               <td
-                colSpan={visibleColumns.length + (renderActions ? 1 : 0)}
+                colSpan={visibleColumns.length + (hasTrailingColumn ? 1 : 0)}
                 className={styles.emptyState}
               >
                 {emptyMessage}
@@ -146,7 +170,7 @@ function TabelaGerenciada<T>({
           {isLoading && (
             <tr>
               <td
-                colSpan={visibleColumns.length + (renderActions ? 1 : 0)}
+                colSpan={visibleColumns.length + (hasTrailingColumn ? 1 : 0)}
                 className={styles.emptyState}
               >
                 {loadingMessage}
@@ -155,22 +179,27 @@ function TabelaGerenciada<T>({
           )}
 
           {!isLoading &&
-            data.map((row) => (
-              <tr key={getRowKey(row)}>
+            data.map((row, index) => {
+              const rowKey = resolveRowKey(row, index);
+
+              return (
+              <tr key={rowKey}>
                 {visibleColumns.map((columnKey) => {
                   const column = columns.find((item) => item.key === columnKey);
-                  const value = column?.render ? column.render(row) : renderValue(row, columnKey);
+                  const rawValue = row[columnKey];
+                  const value = column?.render ? column.render(row) : defaultRenderCell(rawValue);
 
-                  return <td key={`${getRowKey(row)}-${columnKey}`}>{value}</td>;
+                  return <td key={`${rowKey}-${columnKey}`}>{value}</td>;
                 })}
 
-                {renderActions && (
+                {hasTrailingColumn && (
                   <td className={styles.actionsColumn}>
-                    <div className={styles.rowActions}>{renderActions(row)}</div>
+                    {renderActions ? <div className={styles.rowActions}>{renderActions(row)}</div> : null}
                   </td>
                 )}
               </tr>
-            ))}
+            );
+            })}
         </tbody>
       </table>
     </div>

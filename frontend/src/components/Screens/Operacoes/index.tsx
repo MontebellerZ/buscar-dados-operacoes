@@ -5,69 +5,29 @@ import { IoEyeOutline, IoPlayOutline, IoTrashOutline } from "react-icons/io5";
 import type { TOperacao } from "../../../types/operacao.type";
 import OperacaoService from "../../../services/operacao.service";
 import AutomacaoService from "../../../services/automacao.service";
+import { formatCurrency, formatDateTime, formatText } from "../../../utils/formatters";
 import TabelaGerenciada, {
   type TabelaGerenciadaColuna,
 } from "../../Shared/TabelaGerenciada";
 import styles from "./styles.module.scss";
 
 const TABLE_KEY = "operacoes";
-const DEFAULT_COLUMNS = ["key", "date", "nomeCliente", "nomeMotorista", "origemDestino", "lucro"];
-
-const COLUMN_DEFS: Array<TabelaGerenciadaColuna<TOperacao>> = [
-  { key: "key", label: "Key" },
-  { key: "date", label: "Data" },
-  { key: "nomeCliente", label: "Cliente" },
-  { key: "nomeMotorista", label: "Motorista" },
-  { key: "cpfMotorista", label: "CPF Motorista" },
-  { key: "origemDestino", label: "Origem/Destino" },
-  { key: "placas", label: "Placas" },
-  { key: "nf", label: "NF" },
-  { key: "pedido", label: "Pedido" },
-  { key: "qtdePlts", label: "Qtde PLTs" },
-  { key: "freteLiquido", label: "Frete Líquido" },
-  { key: "taxaMotorista", label: "Taxa Motorista" },
-  { key: "lucro", label: "Lucro" },
-  { key: "validado", label: "Validado" },
+const COLUMN_DEFS: TabelaGerenciadaColuna<TOperacao>[] = [
+  { key: "key", label: "Key", render: (row) => formatText(row.key), default: true },
+  { key: "date", label: "Data", render: (row) => formatDateTime(row.date), default: true },
+  { key: "nomeCliente", label: "Cliente", render: (row) => formatText(row.nomeCliente), default: true },
+  { key: "nomeMotorista", label: "Motorista", render: (row) => formatText(row.nomeMotorista), default: true },
+  { key: "cpfMotorista", label: "CPF Motorista", render: (row) => formatText(row.cpfMotorista) },
+  { key: "origemDestino", label: "Origem/Destino", render: (row) => formatText(row.origemDestino), default: true },
+  { key: "placas", label: "Placas", render: (row) => formatText(row.placas) },
+  { key: "nf", label: "NF", render: (row) => formatText(row.nf) },
+  { key: "pedido", label: "Pedido", render: (row) => formatText(row.pedido) },
+  { key: "qtdePlts", label: "Qtde PLTs", render: (row) => formatText(row.qtdePlts) },
+  { key: "freteLiquido", label: "Frete Líquido", render: (row) => formatCurrency(row.freteLiquido) },
+  { key: "taxaMotorista", label: "Taxa Motorista", render: (row) => formatCurrency(row.taxaMotorista) },
+  { key: "lucro", label: "Lucro", render: (row) => formatCurrency(row.lucro), default: true },
+  { key: "validado", label: "Validado", render: (row) => (row.validado ? "Sim" : "Não") },
 ];
-
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
-
-const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
-  dateStyle: "short",
-  timeStyle: "short",
-});
-
-function parseDate(value: string | Date) {
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return dateFormatter.format(date);
-}
-
-function renderCell(operacao: TOperacao, columnKey: string) {
-  const value = operacao[columnKey as keyof TOperacao];
-
-  if (columnKey === "date") {
-    return parseDate(value as string | Date);
-  }
-
-  if (["freteLiquido", "taxaMotorista", "lucro"].includes(columnKey)) {
-    if (typeof value !== "number") return "-";
-    return currencyFormatter.format(value);
-  }
-
-  if (columnKey === "validado") {
-    return value ? "Sim" : "Não";
-  }
-
-  if (value === null || value === undefined || value === "") {
-    return "-";
-  }
-
-  return String(value);
-}
 
 function Operacoes() {
   const navigate = useNavigate();
@@ -152,7 +112,7 @@ function Operacoes() {
           <h1>Operações</h1>
           <p>
             Última execução da automação <strong>operacoesAtlassian</strong>:{" "}
-            {lastRunAt ? parseDate(lastRunAt) : "Ainda não executada"}
+            {lastRunAt ? formatDateTime(lastRunAt) : "Ainda não executada"}
           </p>
         </div>
 
@@ -183,13 +143,11 @@ function Operacoes() {
         <TabelaGerenciada
           tabelaKey={TABLE_KEY}
           columns={COLUMN_DEFS}
-          defaultVisibleColumns={DEFAULT_COLUMNS}
           data={operacoes}
           isLoading={isLoading}
           emptyMessage="Nenhuma operação encontrada."
           loadingMessage="Carregando operações..."
-          getRowKey={(operacao) => operacao.id}
-          renderCell={(operacao, columnKey) => renderCell(operacao, columnKey)}
+          allowColumnEdit
           renderActions={(operacao) => (
             <>
               <button
