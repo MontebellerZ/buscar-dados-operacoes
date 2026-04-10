@@ -1,17 +1,23 @@
 import type { TOperacao } from "../types/operacao.type";
 import BaseService from "./base.service";
 
-class OperacaoService extends BaseService {
+export type TAutomacaoRun = {
+  id: number;
+  automacao: string;
+  criadoEm: string;
+};
+
+class AutomacaoService extends BaseService {
   static async GetAll() {
-    return await this.get<TOperacao[]>("/automacao/");
+    return await this.get<TAutomacaoRun[]>("/automacao/all");
   }
 
   static async GetAllByNome(nome: string) {
-    return await this.get<TOperacao[]>(`/automacao/all/${nome}`);
+    return await this.get<TAutomacaoRun[]>(`/automacao/all/${nome}`);
   }
 
   static async GetLastByNome(nome: string) {
-    return await this.get<TOperacao[]>(`/automacao/last/${nome}`);
+    return await this.get<TAutomacaoRun | null>(`/automacao/last/${nome}`);
   }
 
   static async OperacoesAtlassian() {
@@ -19,4 +25,4 @@ class OperacaoService extends BaseService {
   }
 }
 
-export default OperacaoService;
+export default AutomacaoService;

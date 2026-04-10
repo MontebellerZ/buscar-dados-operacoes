@@ -10,7 +10,7 @@ const api = axios.create({
 
 export default abstract class BaseService {
   protected static async get<T>(...args: Parameters<typeof api.get>): Promise<T> {
-    return await axios
+    return await api
       .get(...args)
       .then((res) => res.data)
       .catch((err) => {

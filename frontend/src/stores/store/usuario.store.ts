@@ -11,4 +11,8 @@ export default class UsuarioStorage extends BaseStorage {
   static save(usuario: TUsuario) {
     return this.localSave(usuario);
   }
+
+  static delete() {
+    return this.localDelete();
+  }
 }

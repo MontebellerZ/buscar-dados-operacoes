@@ -9,11 +9,16 @@ type TStorageClass<K extends keyof StorageMap = keyof StorageMap> = {
 };
 
 export default abstract class BaseStorage {
-  protected static localSave<K extends keyof StorageMap>(this: TStorageClass<K>, value: StorageMap[K]): void {
+  protected static localSave<K extends keyof StorageMap>(
+    this: TStorageClass<K>,
+    value: StorageMap[K],
+  ): void {
     useStorage.setItem(this.name, JSON.stringify(value));
   }
 
-  protected static localGet<K extends keyof StorageMap>(this: TStorageClass<K>): StorageMap[K] | undefined {
+  protected static localGet<K extends keyof StorageMap>(
+    this: TStorageClass<K>,
+  ): StorageMap[K] | undefined {
     const value = useStorage.getItem(this.name);
     if (!value) return;
 
@@ -23,5 +28,9 @@ export default abstract class BaseStorage {
       console.warn(`Erro ao fazer parse da chave ${this.name}`);
       return;
     }
+  }
+
+  protected static localDelete<K extends keyof StorageMap>(this: TStorageClass<K>) {
+    useStorage.removeItem(this.name);
   }
 }

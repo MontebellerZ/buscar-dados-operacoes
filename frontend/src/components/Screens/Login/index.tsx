@@ -29,6 +29,7 @@ function Login() {
       .then(() => {
         toast.success(`Login realizado com sucesso!`);
         if (manter) UsuarioStorage.save({ email, senha });
+        else UsuarioStorage.delete();
         navigate("/main");
       })
       .catch((err) => toast.error(err.toString()))
