@@ -62,13 +62,6 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
   }, [defaultVisibleColumns, tabelaKey, visibleColumns]);
 
   useEffect(() => {
-    setSelectedColumns((prev) => {
-      const sanitized = prev.filter((columnKey) => columns.some((column) => column.key === columnKey));
-      return sanitized.length ? sanitized : defaultVisibleColumns;
-    });
-  }, [columns, defaultVisibleColumns]);
-
-  useEffect(() => {
     if (!isColumnMenuOpen) return;
 
     const handleClickOutside = (event: MouseEvent) => {
