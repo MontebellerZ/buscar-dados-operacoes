@@ -26,13 +26,15 @@ body,
 }
 
 body {
-  --sb-track-color: #ffffff00;
+  --sb-track-color: #ffffff;
   --sb-thumb-color: #746baf;
-  --sb-size: 8px;
-  --sb-radius: 3px;
+  --sb-size: 10px;
+  --sb-radius: 32px;
+  --sb-border: 2px;
 
   ::-webkit-scrollbar {
     width: var(--sb-size);
+    height: var(--sb-size);
   }
 
   ::-webkit-scrollbar-track {
@@ -42,10 +44,13 @@ body {
 
   ::-webkit-scrollbar-thumb {
     background: var(--sb-thumb-color);
+    border: var(--sb-border) solid var(--sb-track-color);
     border-radius: var(--sb-radius);
   }
+}
 
-  @supports not selector(::-webkit-scrollbar) {
+@supports not selector(::-webkit-scrollbar) {
+  body {
     scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
   }
 }

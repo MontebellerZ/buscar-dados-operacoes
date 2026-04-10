@@ -9,21 +9,21 @@ class AutomacaoRepository {
 
   static async GetAll() {
     return await prisma.runsAutomacao.findMany({
-      orderBy: [{ date: "desc" }, { id: "desc" }],
+      orderBy: [{ criadoEm: "desc" }, { id: "desc" }],
     });
   }
 
   static async GetAllByNome(nome: string) {
     return await prisma.runsAutomacao.findMany({
       where: { automacao: nome },
-      orderBy: [{ date: "desc" }, { id: "desc" }],
+      orderBy: [{ criadoEm: "desc" }, { id: "desc" }],
     });
   }
 
   static async GetLastByNome(nome: string) {
     return await prisma.runsAutomacao.findFirst({
       where: { automacao: nome },
-      orderBy: [{ date: "desc" }, { id: "desc" }],
+      orderBy: [{ criadoEm: "desc" }, { id: "desc" }],
     });
   }
 }

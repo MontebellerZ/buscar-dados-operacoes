@@ -1,22 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
-import {
-  IoEllipsisHorizontalSharp,
-  IoEyeOutline,
-  IoPlayOutline,
-  IoTrashOutline,
-} from "react-icons/io5";
+import { IoEyeOutline, IoPlayOutline, IoTrashOutline } from "react-icons/io5";
 import type { TOperacao } from "../../../types/operacao.type";
 import OperacaoService from "../../../services/operacao.service";
 import AutomacaoService from "../../../services/automacao.service";
-import TabelaStorage from "../../../stores/store/tabela.store";
+import TabelaGerenciada, {
+  type TabelaGerenciadaColuna,
+} from "../../Shared/TabelaGerenciada";
 import styles from "./styles.module.scss";
 
 const TABLE_KEY = "operacoes";
 const DEFAULT_COLUMNS = ["key", "date", "nomeCliente", "nomeMotorista", "origemDestino", "lucro"];
 
-const COLUMN_DEFS: Array<{ key: string; label: string }> = [
+const COLUMN_DEFS: Array<TabelaGerenciadaColuna<TOperacao>> = [
   { key: "key", label: "Key" },
   { key: "date", label: "Data" },
   { key: "nomeCliente", label: "Cliente" },
@@ -75,17 +72,12 @@ function renderCell(operacao: TOperacao, columnKey: string) {
 function Operacoes() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const columnSelectorRef = useRef<HTMLDivElement | null>(null);
 
   const [operacoes, setOperacoes] = useState<TOperacao[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRunningAutomation, setIsRunningAutomation] = useState(false);
   const [lastRunAt, setLastRunAt] = useState<string | null>(null);
-  const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
   const [deleteCandidate, setDeleteCandidate] = useState<TOperacao | null>(null);
-  const [columns, setColumns] = useState<string[]>(
-    () => TabelaStorage.getByTabela(TABLE_KEY) || DEFAULT_COLUMNS,
-  );
 
   const selectedOperacao = useMemo(() => {
     if (!id) return null;
@@ -93,11 +85,6 @@ function Operacoes() {
     if (!Number.isFinite(parsedId)) return null;
     return operacoes.find((item) => item.id === parsedId) || null;
   }, [id, operacoes]);
-
-  const visibleColumns = useMemo(() => {
-    const uniqueColumns = Array.from(new Set(columns));
-    return uniqueColumns.filter((column) => COLUMN_DEFS.some((col) => col.key === column));
-  }, [columns]);
 
   const loadLastAutomationRun = async () => {
     return AutomacaoService.GetLastByNome("operacoesAtlassian")
@@ -129,37 +116,6 @@ function Operacoes() {
       isMounted = false;
     };
   }, []);
-
-  useEffect(() => {
-    TabelaStorage.saveByTabela(TABLE_KEY, visibleColumns.length ? visibleColumns : DEFAULT_COLUMNS);
-  }, [visibleColumns]);
-
-  useEffect(() => {
-    if (!isColumnMenuOpen) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (!columnSelectorRef.current?.contains(event.target as Node)) {
-        setIsColumnMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isColumnMenuOpen]);
-
-  const toggleColumn = (columnKey: string) => {
-    setColumns((prev) => {
-      if (prev.includes(columnKey)) {
-        const next = prev.filter((item) => item !== columnKey);
-        return next.length ? next : DEFAULT_COLUMNS;
-      }
-
-      return [...prev, columnKey];
-    });
-  };
 
   const runAutomation = async () => {
     setIsRunningAutomation(true);
@@ -224,91 +180,36 @@ function Operacoes() {
       )}
 
       <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              {visibleColumns.map((column) => (
-                <th key={column}>
-                  {COLUMN_DEFS.find((item) => item.key === column)?.label || column}
-                </th>
-              ))}
-              <th className={styles.actionsColumn}>
-                <div className={styles.columnSelector} ref={columnSelectorRef}>
-                  <button
-                    type="button"
-                    title="Selecionar colunas"
-                    aria-label="Selecionar colunas"
-                    onClick={() => setIsColumnMenuOpen((prev) => !prev)}
-                  >
-                    <IoEllipsisHorizontalSharp />
-                  </button>
+        <TabelaGerenciada
+          tabelaKey={TABLE_KEY}
+          columns={COLUMN_DEFS}
+          defaultVisibleColumns={DEFAULT_COLUMNS}
+          data={operacoes}
+          isLoading={isLoading}
+          emptyMessage="Nenhuma operação encontrada."
+          loadingMessage="Carregando operações..."
+          getRowKey={(operacao) => operacao.id}
+          renderCell={(operacao, columnKey) => renderCell(operacao, columnKey)}
+          renderActions={(operacao) => (
+            <>
+              <button
+                type="button"
+                title="Ver operação"
+                onClick={() => navigate(`/main/operacoes/${operacao.id}`)}
+              >
+                <IoEyeOutline />
+              </button>
 
-                  {isColumnMenuOpen && (
-                    <div className={styles.columnMenu}>
-                      {COLUMN_DEFS.map((column) => (
-                        <label key={column.key}>
-                          <input
-                            type="checkbox"
-                            checked={visibleColumns.includes(column.key)}
-                            onChange={() => toggleColumn(column.key)}
-                          />
-                          {column.label}
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {!isLoading && operacoes.length === 0 && (
-              <tr>
-                <td colSpan={visibleColumns.length + 1} className={styles.emptyState}>
-                  Nenhuma operação encontrada.
-                </td>
-              </tr>
-            )}
-
-            {isLoading && (
-              <tr>
-                <td colSpan={visibleColumns.length + 1} className={styles.emptyState}>
-                  Carregando operações...
-                </td>
-              </tr>
-            )}
-
-            {!isLoading &&
-              operacoes.map((operacao) => (
-                <tr key={operacao.id}>
-                  {visibleColumns.map((column) => (
-                    <td key={`${operacao.id}-${column}`}>{renderCell(operacao, column)}</td>
-                  ))}
-
-                  <td className={styles.actionsColumn}>
-                    <div className={styles.rowActions}>
-                      <button
-                        type="button"
-                        title="Ver operação"
-                        onClick={() => navigate(`/main/operacoes/${operacao.id}`)}
-                      >
-                        <IoEyeOutline />
-                      </button>
-
-                      <button
-                        type="button"
-                        title="Excluir operação"
-                        onClick={() => setDeleteCandidate(operacao)}
-                      >
-                        <IoTrashOutline />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+              <button
+                type="button"
+                title="Excluir operação"
+                onClick={() => setDeleteCandidate(operacao)}
+              >
+                <IoTrashOutline />
+              </button>
+            </>
+          )}
+        />
       </div>
 
       {deleteCandidate && (
