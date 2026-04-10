@@ -7,6 +7,7 @@ const getEnv = {
   WEB_PORT: process.env.WEB_PORT ? +process.env.WEB_PORT : 5173,
   WORKERS: process.env.WORKERS ? +process.env.WORKERS : 20,
   OUTPUT_PATH: process.env.OUTPUT_PATH ?? "dados-operacoes.xlsx",
+  PROJECT_NAME: process.env.PROJECT_NAME,
 };
 
 const naoEncontrados = Object.entries(getEnv)
@@ -24,6 +25,7 @@ const envData = {
   outputPath: getEnv.OUTPUT_PATH,
   apiPort: getEnv.API_PORT,
   webPort: getEnv.WEB_PORT,
+  projectName: getEnv.PROJECT_NAME!,
 };
 
 export default envData;

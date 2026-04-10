@@ -1,8 +1,8 @@
 import envData from "../../../config/envData";
-import { Operacao } from "../../../types/operacao.type";
+import { TOperacaoAutomacao } from "../../../types/operacaoAutomacao.type";
 import XLSX from "xlsx";
 
-function salvarExcel(itens: Operacao[], outputPath?: string): void {
+function salvarExcel(itens: TOperacaoAutomacao[], outputPath?: string): void {
   console.info("Gerando conteúdo da planilha");
 
   const linhas: string[][] = [
@@ -33,7 +33,7 @@ function salvarExcel(itens: Operacao[], outputPath?: string): void {
       item.nf ?? "",
       item.pedido ?? "",
       item.qtdePlts ?? "",
-      item.freteLiquido ?? "",
+      item.freteLiquido?.toString() ?? "",
     ]);
   }
 

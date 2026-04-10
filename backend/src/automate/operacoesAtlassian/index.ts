@@ -1,23 +1,15 @@
-import salvarExcel from "./functions/salvarExcel";
 import processarIssues from "./functions/processarIssues";
 import Api from "./api";
 import ordenarIssues from "./functions/ordenarIssues";
 
-interface IOperacoesAtlassian {
-  gerarExcel?: boolean;
-  excelOutputPath?: string;
-}
-
-async function operacoesAtlassian(props?: IOperacoesAtlassian) {
+async function operacoesAtlassian() {
   console.info("Iniciando execução da automação.");
 
-  const itens = await Api.BuscarListaIssues();
+  const chaves = await Api.BuscarListaIssues();
 
-  await processarIssues(itens);
+  const itens = await processarIssues(chaves);
 
   ordenarIssues(itens);
-
-  if (props?.gerarExcel) salvarExcel(itens, props.excelOutputPath);
 
   console.info("Automação finalizada com sucesso.");
 

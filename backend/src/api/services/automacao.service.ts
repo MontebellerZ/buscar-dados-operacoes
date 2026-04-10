@@ -1,9 +1,12 @@
 import operacoesAtlassian from "../../automate/operacoesAtlassian";
+import OperacaoService from "./operacao.service";
 import BaseService from "./base.service";
 
 class AutomacaoService extends BaseService {
-  static OperacoesAtlassian(...args: Parameters<typeof operacoesAtlassian>) {
-    return operacoesAtlassian(...args);
+  static async OperacoesAtlassian() {
+    const extraido = await operacoesAtlassian();
+    await OperacaoService.UpsertAutomacao(extraido);
+    return await OperacaoService.GetAll();
   }
 }
 

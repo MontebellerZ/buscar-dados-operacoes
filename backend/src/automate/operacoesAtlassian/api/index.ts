@@ -1,7 +1,7 @@
 import { Cookie } from "puppeteer";
 import envData from "../../../config/envData";
 import { create } from "axios";
-import { Operacao } from "../../../types/operacao.type";
+import { TOperacaoAutomacao } from "../../../types/operacaoAutomacao.type";
 import ApiBody from "./bodys";
 import {
   ResponseBuscarDadosExpandidos,
@@ -21,8 +21,8 @@ class Api {
     axios.defaults.headers.common["Cookie"] = cookiesString;
   }
 
-  static async BuscarListaIssues(): Promise<Operacao[]> {
-    const results: Operacao[] = [];
+  static async BuscarListaIssues(): Promise<string[]> {
+    const results: string[] = [];
     let nextToken: string | undefined = undefined;
 
     console.info("Buscando lista de itens.");
@@ -38,7 +38,7 @@ class Api {
       page++;
       console.info(`Rastreada a página ${page} de ${data.allReqFilter.totalPages}.`);
 
-      const novosItens = data.allReqFilter.requestList.map((l): Operacao => ({ key: l.key }));
+      const novosItens = data.allReqFilter.requestList.map((l) => l.key);
 
       results.push(...novosItens);
       nextToken = data.allReqFilter.nextToken;
@@ -49,7 +49,7 @@ class Api {
     return results;
   }
 
-  static async BuscarIssueId(key: Operacao["key"]) {
+  static async BuscarIssueId(key: TOperacaoAutomacao["key"]) {
     const body = ApiBody.buscarIssueId(key);
 
     const data: ResponseBuscarIssueId = await axios
@@ -59,7 +59,7 @@ class Api {
     return data.reqDetails.issue;
   }
 
-  static async BuscarDadosExpandidos(id: Operacao["id"]) {
+  static async BuscarDadosExpandidos(id: TOperacaoAutomacao["issueId"]) {
     const body = ApiBody.buscarDadosExpandidos();
 
     const data: ResponseBuscarDadosExpandidos = await axios

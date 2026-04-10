@@ -1,39 +1,42 @@
-import { Operacao } from "../../../types/operacao.type";
+import { TOperacaoAutomacao } from "../../../types/operacaoAutomacao.type";
 import envData from "../../../config/envData";
 import Api from "../api";
-import atribuirDadosExpandidos from "./atribuirDadosExpandidos";
-import atribuirDadosIssue from "./atribuirDadosIssue";
+import converterDadosExpandidos from "./converterDadosExpandidos";
+import converterDadosIssue from "./converterDadosIssue";
 
-async function processarIssues(itens: Operacao[]) {
+async function processarIssues(chaves: string[]) {
   const { workers } = envData;
 
-  const totalWorkers = Math.max(1, Math.min(workers, itens.length || 1));
-  let indexAtual = 0;
-  let completas = 0;
+  const totalChaves = chaves.length;
+  const totalWorkers = Math.max(1, Math.min(workers, totalChaves || 1));
+
+  const operacoes: TOperacaoAutomacao[] = [];
   let erro: any;
 
-  console.info(`Total de issues a serem processadas: ${itens.length}.`);
+  console.info(`Total de issues a serem processadas: ${totalChaves}.`);
   console.info(`Total de workers para a execução: ${totalWorkers}.`);
 
   const worker = async (id: number) => {
-    while (!erro && indexAtual < itens.length) {
-      const item = itens[indexAtual];
-      indexAtual++;
+    while (!erro && chaves.length) {
+      const chave = chaves.shift()!;
 
       try {
-        const dadosIssue = await Api.BuscarIssueId(item.key);
+        const dadosIssue = await Api.BuscarIssueId(chave);
 
-        atribuirDadosIssue(item, dadosIssue);
+        const issue = converterDadosIssue(dadosIssue);
 
-        const dadosExpandidos = await Api.BuscarDadosExpandidos(item.id);
+        const dadosExpandidos = await Api.BuscarDadosExpandidos(issue.issueId);
 
-        atribuirDadosExpandidos(item, dadosExpandidos);
+        const expandido = converterDadosExpandidos(dadosExpandidos);
 
-        completas++;
-        console.info(`Processado ${item.key} (${completas} de ${itens.length}) // worker ${id}`);
+        const operacao: TOperacaoAutomacao = { key: chave, ...issue, ...expandido };
+
+        operacoes.push(operacao);
+
+        console.info(`Processado ${chave} (${operacoes.length} de ${totalChaves}) // worker ${id}`);
       } catch (err) {
         erro = err;
-        console.error(item.key, err);
+        console.error(chave, err);
         throw err;
       }
     }
@@ -43,7 +46,9 @@ async function processarIssues(itens: Operacao[]) {
 
   await Promise.all(Array.from({ length: totalWorkers }, (_, i) => worker(i + 1)));
 
-  console.info(`Processamento de issues completo: ${completas} rastreadas.`);
+  console.info(`Processamento de issues completo: ${operacoes.length} rastreadas.`);
+
+  return operacoes;
 }
 
 export default processarIssues;

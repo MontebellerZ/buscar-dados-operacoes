@@ -1,4 +1,4 @@
-import { Operacao } from "../../../types/operacao.type";
+import { TOperacaoAutomacao } from "../../../types/operacaoAutomacao.type";
 
 class ApiBody {
   static buscarListaIssues = (nextToken?: string) => ({
@@ -16,7 +16,7 @@ class ApiBody {
     models: ["allReqFilter", "xsrfToken"],
   });
 
-  static buscarIssueId = (key: Operacao["key"]) => ({
+  static buscarIssueId = (key: TOperacaoAutomacao["key"]) => ({
     options: {
       reqDetails: { key: key },
       portalId: 289,
