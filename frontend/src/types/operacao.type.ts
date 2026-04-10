@@ -13,6 +13,7 @@ export type TOperacao = {
   qtdePlts?: string;
   freteLiquido?: number;
   taxaMotorista?: number;
+  lucro?: number;
   validado: number;
   ativo: number;
 };
