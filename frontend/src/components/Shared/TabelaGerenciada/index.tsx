@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { IoEllipsisHorizontalSharp } from "react-icons/io5";
+import { IoSettingsOutline } from "react-icons/io5";
 import TabelaStorage from "../../../stores/store/tabela.store";
 import Button from "../Button";
 import styles from "./styles.module.scss";
@@ -15,13 +15,12 @@ type TabelaGerenciadaProps<T extends Record<string, unknown>> = {
   tabelaKey: string;
   columns: TabelaGerenciadaColuna<T>[];
   data: T[];
-  itensPorPagina?: number;
+  itensPorPagina: number;
   page?: number;
   totalItems?: number;
   onPageChange?: (page: number) => void;
   isLoading?: boolean;
   emptyMessage?: string;
-  loadingMessage?: string;
   renderActions?: (row: T) => React.ReactNode;
   allowColumnEdit?: boolean;
 };
@@ -38,13 +37,12 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
   tabelaKey,
   columns,
   data,
-  itensPorPagina = 50,
+  itensPorPagina,
   page,
   totalItems,
   onPageChange,
   isLoading = false,
   emptyMessage = "Nenhum registro encontrado.",
-  loadingMessage = "Carregando...",
   renderActions,
   allowColumnEdit = true,
 }: TabelaGerenciadaProps<T>) {
@@ -110,7 +108,7 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
     return index;
   };
 
-  const hasTrailingColumn = Boolean(renderActions) || allowColumnEdit;
+  const hasTrailingColumn = Boolean(renderActions);
 
   const safeItensPorPagina = Math.max(1, itensPorPagina);
   const usesServerPagination =
@@ -157,40 +155,7 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
                 return <th key={columnKey}>{column?.label || columnKey}</th>;
               })}
 
-              {hasTrailingColumn && (
-                <th className={styles.actionsColumn}>
-                  {allowColumnEdit ? (
-                    <div className={styles.columnSelector} ref={columnSelectorRef}>
-                      <Button
-                        variant="icon"
-                        title="Selecionar colunas"
-                        aria-label="Selecionar colunas"
-                        className={styles.columnSelectorBtn}
-                        onClick={() => setIsColumnMenuOpen((prev) => !prev)}
-                      >
-                        <IoEllipsisHorizontalSharp />
-                      </Button>
-
-                      {isColumnMenuOpen && (
-                        <div className={styles.columnMenu}>
-                          {columns.map((column) => (
-                            <label key={column.key}>
-                              <input
-                                type="checkbox"
-                                checked={visibleColumns.includes(column.key)}
-                                onChange={() => toggleColumn(column.key)}
-                              />
-                              {column.label}
-                            </label>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    "Ações"
-                  )}
-                </th>
-              )}
+              {hasTrailingColumn && <th className={styles.actionsColumn}>Ações</th>}
             </tr>
           </thead>
 
@@ -206,16 +171,22 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
               </tr>
             )}
 
-            {isLoading && (
-              <tr>
-                <td
-                  colSpan={visibleColumns.length + (hasTrailingColumn ? 1 : 0)}
-                  className={styles.emptyState}
-                >
-                  {loadingMessage}
-                </td>
-              </tr>
-            )}
+            {isLoading &&
+              Array.from({ length: safeItensPorPagina }).map((_, rowIndex) => (
+                <tr key={`skeleton-${rowIndex}`}>
+                  {visibleColumns.map((columnKey) => (
+                    <td key={`skeleton-${rowIndex}-${columnKey}`} className={styles.skeletonCell}>
+                      <span className={styles.skeletonShimmer} />
+                    </td>
+                  ))}
+
+                  {hasTrailingColumn && (
+                    <td className={styles.skeletonCell}>
+                      <span className={styles.skeletonShimmer} />
+                    </td>
+                  )}
+                </tr>
+              ))}
 
             {!isLoading &&
               tableData.map((row, index) => {
@@ -270,6 +241,35 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
           >
             Próxima
           </Button>
+
+          {allowColumnEdit && (
+            <div className={styles.columnSelector} ref={columnSelectorRef}>
+              <Button
+                variant="icon"
+                title="Selecionar colunas"
+                aria-label="Selecionar colunas"
+                className={styles.columnSelectorBtn}
+                onClick={() => setIsColumnMenuOpen((prev) => !prev)}
+              >
+                <IoSettingsOutline />
+              </Button>
+
+              {isColumnMenuOpen && (
+                <div className={styles.columnMenuUp}>
+                  {columns.map((column) => (
+                    <label key={column.key}>
+                      <input
+                        type="checkbox"
+                        checked={visibleColumns.includes(column.key)}
+                        onChange={() => toggleColumn(column.key)}
+                      />
+                      {column.label}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

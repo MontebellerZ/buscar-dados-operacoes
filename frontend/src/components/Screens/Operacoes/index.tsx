@@ -153,7 +153,6 @@ function Operacoes() {
         itensPorPagina={ITEMS_PER_PAGE}
         isLoading={isLoading}
         emptyMessage="Nenhuma operação encontrada."
-        loadingMessage="Carregando operações..."
         allowColumnEdit
         renderActions={(operacao) => (
           <>
