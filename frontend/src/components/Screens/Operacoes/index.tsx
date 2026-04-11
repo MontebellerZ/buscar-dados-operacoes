@@ -139,8 +139,7 @@ function Operacoes() {
         </article>
       )}
 
-      <div className={styles.tableWrapper}>
-        <TabelaGerenciada
+      <TabelaGerenciada
           tabelaKey={TABLE_KEY}
           columns={COLUMN_DEFS}
           data={operacoes}
@@ -168,7 +167,7 @@ function Operacoes() {
             </>
           )}
         />
-      </div>
+
 
       {deleteCandidate && (
         <div className={styles.modalOverlay}>

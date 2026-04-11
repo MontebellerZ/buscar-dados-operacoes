@@ -104,97 +104,103 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
 
   return (
     <div className={styles.tableWrapper}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            {visibleColumns.map((columnKey) => {
-              const column = columns.find((item) => item.key === columnKey);
-              return <th key={columnKey}>{column?.label || columnKey}</th>;
-            })}
-
-            {hasTrailingColumn && (
-              <th className={styles.actionsColumn}>
-                {allowColumnEdit ? (
-                  <div className={styles.columnSelector} ref={columnSelectorRef}>
-                    <button
-                      type="button"
-                      title="Selecionar colunas"
-                      aria-label="Selecionar colunas"
-                      onClick={() => setIsColumnMenuOpen((prev) => !prev)}
-                    >
-                      <IoEllipsisHorizontalSharp />
-                    </button>
-
-                    {isColumnMenuOpen && (
-                      <div className={styles.columnMenu}>
-                        {columns.map((column) => (
-                          <label key={column.key}>
-                            <input
-                              type="checkbox"
-                              checked={visibleColumns.includes(column.key)}
-                              onChange={() => toggleColumn(column.key)}
-                            />
-                            {column.label}
-                          </label>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  "Ações"
-                )}
-              </th>
-            )}
-          </tr>
-        </thead>
-
-        <tbody>
-          {!isLoading && data.length === 0 && (
+      <div className={styles.tableOverflow}>
+        <table className={styles.table}>
+          <thead>
             <tr>
-              <td
-                colSpan={visibleColumns.length + (hasTrailingColumn ? 1 : 0)}
-                className={styles.emptyState}
-              >
-                {emptyMessage}
-              </td>
+              {visibleColumns.map((columnKey) => {
+                const column = columns.find((item) => item.key === columnKey);
+                return <th key={columnKey}>{column?.label || columnKey}</th>;
+              })}
+
+              {hasTrailingColumn && (
+                <th className={styles.actionsColumn}>
+                  {allowColumnEdit ? (
+                    <div className={styles.columnSelector} ref={columnSelectorRef}>
+                      <button
+                        type="button"
+                        title="Selecionar colunas"
+                        aria-label="Selecionar colunas"
+                        onClick={() => setIsColumnMenuOpen((prev) => !prev)}
+                      >
+                        <IoEllipsisHorizontalSharp />
+                      </button>
+
+                      {isColumnMenuOpen && (
+                        <div className={styles.columnMenu}>
+                          {columns.map((column) => (
+                            <label key={column.key}>
+                              <input
+                                type="checkbox"
+                                checked={visibleColumns.includes(column.key)}
+                                onChange={() => toggleColumn(column.key)}
+                              />
+                              {column.label}
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    "Ações"
+                  )}
+                </th>
+              )}
             </tr>
-          )}
+          </thead>
 
-          {isLoading && (
-            <tr>
-              <td
-                colSpan={visibleColumns.length + (hasTrailingColumn ? 1 : 0)}
-                className={styles.emptyState}
-              >
-                {loadingMessage}
-              </td>
-            </tr>
-          )}
-
-          {!isLoading &&
-            data.map((row, index) => {
-              const rowKey = resolveRowKey(row, index);
-
-              return (
-              <tr key={rowKey}>
-                {visibleColumns.map((columnKey) => {
-                  const column = columns.find((item) => item.key === columnKey);
-                  const rawValue = row[columnKey];
-                  const value = column?.render ? column.render(row) : defaultRenderCell(rawValue);
-
-                  return <td key={`${rowKey}-${columnKey}`}>{value}</td>;
-                })}
-
-                {hasTrailingColumn && (
-                  <td className={styles.actionsColumn}>
-                    {renderActions ? <div className={styles.rowActions}>{renderActions(row)}</div> : null}
-                  </td>
-                )}
+          <tbody>
+            {!isLoading && data.length === 0 && (
+              <tr>
+                <td
+                  colSpan={visibleColumns.length + (hasTrailingColumn ? 1 : 0)}
+                  className={styles.emptyState}
+                >
+                  {emptyMessage}
+                </td>
               </tr>
-            );
-            })}
-        </tbody>
-      </table>
+            )}
+
+            {isLoading && (
+              <tr>
+                <td
+                  colSpan={visibleColumns.length + (hasTrailingColumn ? 1 : 0)}
+                  className={styles.emptyState}
+                >
+                  {loadingMessage}
+                </td>
+              </tr>
+            )}
+
+            {!isLoading &&
+              data.map((row, index) => {
+                const rowKey = resolveRowKey(row, index);
+
+                return (
+                  <tr key={rowKey}>
+                    {visibleColumns.map((columnKey) => {
+                      const column = columns.find((item) => item.key === columnKey);
+                      const rawValue = row[columnKey];
+                      const value = column?.render
+                        ? column.render(row)
+                        : defaultRenderCell(rawValue);
+
+                      return <td key={`${rowKey}-${columnKey}`}>{value}</td>;
+                    })}
+
+                    {hasTrailingColumn && (
+                      <td className={styles.actionsColumn}>
+                        {renderActions ? (
+                          <div className={styles.rowActions}>{renderActions(row)}</div>
+                        ) : null}
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
