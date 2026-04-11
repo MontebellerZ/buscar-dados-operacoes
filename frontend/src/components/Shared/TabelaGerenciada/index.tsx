@@ -14,6 +14,7 @@ type TabelaGerenciadaProps<T extends Record<string, unknown>> = {
   tabelaKey: string;
   columns: TabelaGerenciadaColuna<T>[];
   data: T[];
+  itensPorPagina?: number;
   isLoading?: boolean;
   emptyMessage?: string;
   loadingMessage?: string;
@@ -33,6 +34,7 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
   tabelaKey,
   columns,
   data,
+  itensPorPagina = 50,
   isLoading = false,
   emptyMessage = "Nenhum registro encontrado.",
   loadingMessage = "Carregando...",
@@ -41,6 +43,7 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
 }: TabelaGerenciadaProps<T>) {
   const columnSelectorRef = useRef<HTMLDivElement | null>(null);
   const [isColumnMenuOpen, setIsColumnMenuOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const defaultVisibleColumns = useMemo(() => {
     const flagged = columns.filter((column) => column.default).map((column) => column.key);
@@ -101,6 +104,18 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
   };
 
   const hasTrailingColumn = Boolean(renderActions) || allowColumnEdit;
+
+  const safeItensPorPagina = Math.max(1, itensPorPagina);
+  const totalPages = Math.max(1, Math.ceil(data.length / safeItensPorPagina));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+
+  const paginatedData = useMemo(() => {
+    const startIndex = (safeCurrentPage - 1) * safeItensPorPagina;
+    return data.slice(startIndex, startIndex + safeItensPorPagina);
+  }, [data, safeCurrentPage, safeItensPorPagina]);
+
+  const startItem = data.length === 0 ? 0 : (safeCurrentPage - 1) * safeItensPorPagina + 1;
+  const endItem = Math.min(safeCurrentPage * safeItensPorPagina, data.length);
 
   return (
     <div className={styles.tableWrapper}>
@@ -173,11 +188,12 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
             )}
 
             {!isLoading &&
-              data.map((row, index) => {
+              paginatedData.map((row, index) => {
+                const rowIndex = (safeCurrentPage - 1) * safeItensPorPagina + index;
                 const rowKey = resolveRowKey(row, index);
 
                 return (
-                  <tr key={rowKey}>
+                  <tr key={`${rowKey}-${rowIndex}`}>
                     {visibleColumns.map((columnKey) => {
                       const column = columns.find((item) => item.key === columnKey);
                       const rawValue = row[columnKey];
@@ -200,6 +216,33 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
               })}
           </tbody>
         </table>
+      </div>
+      <div className={styles.tableFooter}>
+        <span className={styles.paginationInfo}>
+          Exibindo {startItem}-{endItem} de {data.length}
+        </span>
+
+        <div className={styles.paginationControls}>
+          <button
+            type="button"
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={safeCurrentPage === 1}
+          >
+            Anterior
+          </button>
+
+          <span>
+            Página {safeCurrentPage} de {totalPages}
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+            disabled={safeCurrentPage === totalPages}
+          >
+            Próxima
+          </button>
+        </div>
       </div>
     </div>
   );
