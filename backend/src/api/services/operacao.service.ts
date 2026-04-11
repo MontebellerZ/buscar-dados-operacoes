@@ -3,6 +3,7 @@ import { TOperacaoAutomacao } from "../../types/operacaoAutomacao.type";
 import OperacaoRepository from "../repositories/operacao.repository";
 import BaseService from "./base.service";
 import { Operacao } from "@prisma/client";
+import Consts from "../../config/consts";
 
 class OperacaoService extends BaseService {
   static async UpsertAutomacao(items: TOperacaoAutomacao[]) {
@@ -17,19 +18,18 @@ class OperacaoService extends BaseService {
     return await OperacaoRepository.GetAll();
   }
 
-  static async GetPaginated(page: number, limit: number) {
-    const safeLimit = Math.min(Math.max(1, limit), 500);
-    const safePage = Math.max(1, page);
-    const { items, total } = await OperacaoRepository.GetPaginated(safePage, safeLimit);
-    const totalPages = Math.max(1, Math.ceil(total / safeLimit));
+  static async GetPaginated(page?: number, limit?: number) {
+    if (!page && !limit) {
+      return await this.GetAll();
+    }
 
-    return {
-      page: safePage,
-      limit: safeLimit,
-      total,
-      totalPages,
-      items,
-    };
+    page = Math.max(1, page ?? 1);
+    limit = Math.max(1, limit ?? Consts.pageSize);
+
+    const { items, total } = await OperacaoRepository.GetPaginated(page, limit);
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+
+    return { page, limit, total, totalPages, items };
   }
 
   static async Update(operacao: Partial<Operacao>) {

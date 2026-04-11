@@ -6,29 +6,14 @@ import { Operacao } from "@prisma/client";
 const operacaoRoutes = Router();
 
 operacaoRoutes.get("/", async (req, res) => {
-  const pageRaw = req.query.page;
-  const limitRaw = req.query.limit;
+  const pageRaw = Number(req.query.page);
+  const limitRaw = Number(req.query.limit);
 
-  const hasPagination = pageRaw !== undefined || limitRaw !== undefined;
-
-  if (!hasPagination) {
-    const result = await OperacaoService.GetAll();
-    res.send(result);
-    return;
-  }
-
-  const page = Number(pageRaw ?? 1);
-  const limit = Number(limitRaw ?? 50);
-
-  if (!Number.isInteger(page) || page <= 0) {
-    throw new BadRequestError("Parametro page deve ser um inteiro maior que 0.");
-  }
-
-  if (!Number.isInteger(limit) || limit <= 0) {
-    throw new BadRequestError("Parametro limit deve ser um inteiro maior que 0.");
-  }
+  const page = Number.isFinite(pageRaw) ? pageRaw : undefined;
+  const limit = Number.isFinite(limitRaw) ? limitRaw : undefined;
 
   const result = await OperacaoService.GetPaginated(page, limit);
+  
   res.send(result);
 });
 
