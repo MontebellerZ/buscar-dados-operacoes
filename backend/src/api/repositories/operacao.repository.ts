@@ -34,6 +34,23 @@ class OperacaoRepository {
     });
   }
 
+  static async GetPaginated(page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    const where = { ativo: true };
+
+    const [items, total] = await prisma.$transaction([
+      prisma.operacao.findMany({
+        where,
+        orderBy: [{ date: "desc" }, { id: "desc" }],
+        skip,
+        take: limit,
+      }),
+      prisma.operacao.count({ where }),
+    ]);
+
+    return { items, total };
+  }
+
   static async UpdateById(id: number, operacao: Partial<Operacao>) {
     try {
       return await prisma.operacao.update({ where: { id }, data: operacao });

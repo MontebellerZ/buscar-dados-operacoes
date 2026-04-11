@@ -4,6 +4,7 @@ import UsuarioService from "../../../services/usuario.service";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
 import UsuarioStorage from "../../../stores/store/usuario.store";
+import Button from "../../Shared/Button";
 
 function Login() {
   const navigate = useNavigate();
@@ -83,9 +84,15 @@ function Login() {
             Manter conectado?
           </label>
 
-          <button type="submit" className={styles.button} disabled={isLoading}>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            fullWidth
+            disabled={isLoading}
+          >
             {isLoading ? "Entrando..." : "Entrar"}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

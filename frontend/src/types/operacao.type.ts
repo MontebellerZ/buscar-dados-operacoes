@@ -17,3 +17,11 @@ export type TOperacao = {
   validado: number;
   ativo: number;
 };
+
+export type TOperacaoPaginada = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  items: TOperacao[];
+};

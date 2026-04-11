@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { IoEllipsisHorizontalSharp } from "react-icons/io5";
 import TabelaStorage from "../../../stores/store/tabela.store";
+import Button from "../Button";
 import styles from "./styles.module.scss";
 
 export type TabelaGerenciadaColuna<T extends Record<string, unknown>> = {
@@ -15,6 +16,9 @@ type TabelaGerenciadaProps<T extends Record<string, unknown>> = {
   columns: TabelaGerenciadaColuna<T>[];
   data: T[];
   itensPorPagina?: number;
+  page?: number;
+  totalItems?: number;
+  onPageChange?: (page: number) => void;
   isLoading?: boolean;
   emptyMessage?: string;
   loadingMessage?: string;
@@ -35,6 +39,9 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
   columns,
   data,
   itensPorPagina = 50,
+  page,
+  totalItems,
+  onPageChange,
   isLoading = false,
   emptyMessage = "Nenhum registro encontrado.",
   loadingMessage = "Carregando...",
@@ -106,16 +113,38 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
   const hasTrailingColumn = Boolean(renderActions) || allowColumnEdit;
 
   const safeItensPorPagina = Math.max(1, itensPorPagina);
-  const totalPages = Math.max(1, Math.ceil(data.length / safeItensPorPagina));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const usesServerPagination =
+    typeof page === "number" &&
+    Number.isFinite(page) &&
+    typeof totalItems === "number" &&
+    Number.isFinite(totalItems) &&
+    Boolean(onPageChange);
+
+  const safeTotalItems = usesServerPagination ? Math.max(0, totalItems) : data.length;
+  const totalPages = Math.max(1, Math.ceil(safeTotalItems / safeItensPorPagina));
+  const safeCurrentPage = Math.min(
+    Math.max(1, usesServerPagination ? Number(page) : currentPage),
+    totalPages,
+  );
 
   const paginatedData = useMemo(() => {
     const startIndex = (safeCurrentPage - 1) * safeItensPorPagina;
     return data.slice(startIndex, startIndex + safeItensPorPagina);
   }, [data, safeCurrentPage, safeItensPorPagina]);
 
-  const startItem = data.length === 0 ? 0 : (safeCurrentPage - 1) * safeItensPorPagina + 1;
-  const endItem = Math.min(safeCurrentPage * safeItensPorPagina, data.length);
+  const tableData = usesServerPagination ? data : paginatedData;
+
+  const startItem = safeTotalItems === 0 ? 0 : (safeCurrentPage - 1) * safeItensPorPagina + 1;
+  const endItem = Math.min(safeCurrentPage * safeItensPorPagina, safeTotalItems);
+
+  const changePage = (nextPage: number) => {
+    if (usesServerPagination) {
+      onPageChange?.(nextPage);
+      return;
+    }
+
+    setCurrentPage(nextPage);
+  };
 
   return (
     <div className={styles.tableWrapper}>
@@ -132,14 +161,15 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
                 <th className={styles.actionsColumn}>
                   {allowColumnEdit ? (
                     <div className={styles.columnSelector} ref={columnSelectorRef}>
-                      <button
-                        type="button"
+                      <Button
+                        variant="icon"
                         title="Selecionar colunas"
                         aria-label="Selecionar colunas"
+                        className={styles.columnSelectorBtn}
                         onClick={() => setIsColumnMenuOpen((prev) => !prev)}
                       >
                         <IoEllipsisHorizontalSharp />
-                      </button>
+                      </Button>
 
                       {isColumnMenuOpen && (
                         <div className={styles.columnMenu}>
@@ -188,7 +218,7 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
             )}
 
             {!isLoading &&
-              paginatedData.map((row, index) => {
+              tableData.map((row, index) => {
                 const rowIndex = (safeCurrentPage - 1) * safeItensPorPagina + index;
                 const rowKey = resolveRowKey(row, index);
 
@@ -219,29 +249,27 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
       </div>
       <div className={styles.tableFooter}>
         <span className={styles.paginationInfo}>
-          Exibindo {startItem}-{endItem} de {data.length}
+          Exibindo {startItem}-{endItem} de {safeTotalItems}
         </span>
 
         <div className={styles.paginationControls}>
-          <button
-            type="button"
-            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+          <Button
+            onClick={() => changePage(Math.max(1, safeCurrentPage - 1))}
             disabled={safeCurrentPage === 1}
           >
             Anterior
-          </button>
+          </Button>
 
           <span>
             Página {safeCurrentPage} de {totalPages}
           </span>
 
-          <button
-            type="button"
-            onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+          <Button
+            onClick={() => changePage(Math.min(totalPages, safeCurrentPage + 1))}
             disabled={safeCurrentPage === totalPages}
           >
             Próxima
-          </button>
+          </Button>
         </div>
       </div>
     </div>

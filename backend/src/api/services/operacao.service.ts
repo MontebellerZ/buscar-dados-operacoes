@@ -17,6 +17,21 @@ class OperacaoService extends BaseService {
     return await OperacaoRepository.GetAll();
   }
 
+  static async GetPaginated(page: number, limit: number) {
+    const safeLimit = Math.min(Math.max(1, limit), 500);
+    const safePage = Math.max(1, page);
+    const { items, total } = await OperacaoRepository.GetPaginated(safePage, safeLimit);
+    const totalPages = Math.max(1, Math.ceil(total / safeLimit));
+
+    return {
+      page: safePage,
+      limit: safeLimit,
+      total,
+      totalPages,
+      items,
+    };
+  }
+
   static async Update(operacao: Partial<Operacao>) {
     if (!operacao.id) throw new BadRequestError("Id não informado");
 

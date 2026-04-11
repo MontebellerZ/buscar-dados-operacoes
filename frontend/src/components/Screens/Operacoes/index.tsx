@@ -6,25 +6,48 @@ import type { TOperacao } from "../../../types/operacao.type";
 import OperacaoService from "../../../services/operacao.service";
 import AutomacaoService from "../../../services/automacao.service";
 import { formatCurrency, formatDateTime, formatText } from "../../../utils/formatters";
-import TabelaGerenciada, {
-  type TabelaGerenciadaColuna,
-} from "../../Shared/TabelaGerenciada";
+import TabelaGerenciada, { type TabelaGerenciadaColuna } from "../../Shared/TabelaGerenciada";
+import Button from "../../Shared/Button";
 import styles from "./styles.module.scss";
 
 const TABLE_KEY = "operacoes";
+const ITEMS_PER_PAGE = 50;
 const COLUMN_DEFS: TabelaGerenciadaColuna<TOperacao>[] = [
   { key: "key", label: "Key", render: (row) => formatText(row.key), default: true },
   { key: "date", label: "Data", render: (row) => formatDateTime(row.date), default: true },
-  { key: "nomeCliente", label: "Cliente", render: (row) => formatText(row.nomeCliente), default: true },
-  { key: "nomeMotorista", label: "Motorista", render: (row) => formatText(row.nomeMotorista), default: true },
+  {
+    key: "nomeCliente",
+    label: "Cliente",
+    render: (row) => formatText(row.nomeCliente),
+    default: true,
+  },
+  {
+    key: "nomeMotorista",
+    label: "Motorista",
+    render: (row) => formatText(row.nomeMotorista),
+    default: true,
+  },
   { key: "cpfMotorista", label: "CPF Motorista", render: (row) => formatText(row.cpfMotorista) },
-  { key: "origemDestino", label: "Origem/Destino", render: (row) => formatText(row.origemDestino), default: true },
+  {
+    key: "origemDestino",
+    label: "Origem/Destino",
+    render: (row) => formatText(row.origemDestino),
+    default: true,
+  },
   { key: "placas", label: "Placas", render: (row) => formatText(row.placas) },
   { key: "nf", label: "NF", render: (row) => formatText(row.nf) },
   { key: "pedido", label: "Pedido", render: (row) => formatText(row.pedido) },
   { key: "qtdePlts", label: "Qtde PLTs", render: (row) => formatText(row.qtdePlts) },
-  { key: "freteLiquido", label: "Frete Líquido", render: (row) => formatCurrency(row.freteLiquido) },
-  { key: "taxaMotorista", label: "Taxa Motorista", render: (row) => formatCurrency(row.taxaMotorista) },
+  {
+    key: "freteLiquido",
+    label: "Frete Líquido",
+    render: (row) => formatCurrency(row.freteLiquido),
+  },
+  {
+    key: "taxaMotorista",
+    label: "Taxa Motorista",
+    render: (row) => formatCurrency(row.taxaMotorista),
+  },
   { key: "lucro", label: "Lucro", render: (row) => formatCurrency(row.lucro), default: true },
   { key: "validado", label: "Validado", render: (row) => (row.validado ? "Sim" : "Não") },
 ];
@@ -34,6 +57,8 @@ function Operacoes() {
   const { id } = useParams();
 
   const [operacoes, setOperacoes] = useState<TOperacao[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalOperacoes, setTotalOperacoes] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isRunningAutomation, setIsRunningAutomation] = useState(false);
   const [lastRunAt, setLastRunAt] = useState<string | null>(null);
@@ -52,17 +77,34 @@ function Operacoes() {
       .catch(() => setLastRunAt(null));
   };
 
+  const loadOperacoes = async (page: number) => {
+    return OperacaoService.GetPaginated(page, ITEMS_PER_PAGE)
+      .then((data) => {
+        setOperacoes(data.items);
+        setTotalOperacoes(data.total);
+
+        if (data.page !== page) {
+          setCurrentPage(data.page);
+        }
+      })
+      .catch((err) => {
+        toast.error(err?.toString?.() || "Erro ao buscar operações.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page === currentPage) return;
+    setIsLoading(true);
+    setCurrentPage(page);
+  };
+
   useEffect(() => {
     let isMounted = true;
 
-    OperacaoService.GetAll()
-      .then((data) => {
-        if (isMounted) setOperacoes(data);
-      })
-      .catch((err) => toast.error(err?.toString?.() || "Erro ao buscar operações."))
-      .finally(() => {
-        if (isMounted) setIsLoading(false);
-      });
+    loadOperacoes(currentPage).catch(() => undefined);
 
     AutomacaoService.GetLastByNome("operacoesAtlassian")
       .then((data) => {
@@ -75,16 +117,17 @@ function Operacoes() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [currentPage]);
 
   const runAutomation = async () => {
     setIsRunningAutomation(true);
 
     return AutomacaoService.OperacoesAtlassian()
-      .then((data) => {
-        setOperacoes(data);
+      .then(() => {
+        setIsLoading(true);
+        setCurrentPage(1);
         toast.success("Automação executada com sucesso.");
-        return loadLastAutomationRun();
+        return Promise.all([loadOperacoes(1), loadLastAutomationRun()]);
       })
       .catch((err) => toast.error(err?.toString?.() || "Erro ao executar automação."))
       .finally(() => setIsRunningAutomation(false));
@@ -94,8 +137,9 @@ function Operacoes() {
     if (!deleteCandidate) return;
 
     return OperacaoService.Delete(deleteCandidate.id)
-      .then(() => {
-        setOperacoes((prev) => prev.filter((item) => item.id !== deleteCandidate.id));
+      .then(async () => {
+        setIsLoading(true);
+        await loadOperacoes(currentPage);
         toast.success("Operação excluída com sucesso.");
         if (selectedOperacao?.id === deleteCandidate.id) {
           navigate("/main/operacoes");
@@ -117,10 +161,10 @@ function Operacoes() {
         </div>
 
         <div className={styles.headerActions}>
-          <button type="button" onClick={runAutomation} disabled={isRunningAutomation}>
+          <Button variant="primary" onClick={runAutomation} disabled={isRunningAutomation}>
             <IoPlayOutline />
             {isRunningAutomation ? "Executando..." : "Rodar automação"}
-          </button>
+          </Button>
         </div>
       </header>
 
@@ -133,41 +177,44 @@ function Operacoes() {
             <p>Origem/Destino: {selectedOperacao.origemDestino}</p>
           </div>
 
-          <button type="button" onClick={() => navigate("/main/operacoes")}>
+          <Button onClick={() => navigate("/main/operacoes")}>
             Fechar detalhe
-          </button>
+          </Button>
         </article>
       )}
 
       <TabelaGerenciada
-          tabelaKey={TABLE_KEY}
-          columns={COLUMN_DEFS}
-          data={operacoes}
-          isLoading={isLoading}
-          emptyMessage="Nenhuma operação encontrada."
-          loadingMessage="Carregando operações..."
-          allowColumnEdit
-          renderActions={(operacao) => (
-            <>
-              <button
-                type="button"
-                title="Ver operação"
-                onClick={() => navigate(`/main/operacoes/${operacao.id}`)}
-              >
-                <IoEyeOutline />
-              </button>
+        tabelaKey={TABLE_KEY}
+        columns={COLUMN_DEFS}
+        data={operacoes}
+        page={currentPage}
+        totalItems={totalOperacoes}
+        onPageChange={handlePageChange}
+        itensPorPagina={ITEMS_PER_PAGE}
+        isLoading={isLoading}
+        emptyMessage="Nenhuma operação encontrada."
+        loadingMessage="Carregando operações..."
+        allowColumnEdit
+        renderActions={(operacao) => (
+          <>
+            <Button
+              variant="icon"
+              title="Ver operação"
+              onClick={() => navigate(`/main/operacoes/${operacao.id}`)}
+            >
+              <IoEyeOutline />
+            </Button>
 
-              <button
-                type="button"
-                title="Excluir operação"
-                onClick={() => setDeleteCandidate(operacao)}
-              >
-                <IoTrashOutline />
-              </button>
-            </>
-          )}
-        />
-
+            <Button
+              variant="icon"
+              title="Excluir operação"
+              onClick={() => setDeleteCandidate(operacao)}
+            >
+              <IoTrashOutline />
+            </Button>
+          </>
+        )}
+      />
 
       {deleteCandidate && (
         <div className={styles.modalOverlay}>
@@ -177,12 +224,12 @@ function Operacoes() {
               Deseja realmente excluir a operação <strong>{deleteCandidate.key}</strong>?
             </p>
             <div className={styles.modalActions}>
-              <button type="button" onClick={() => setDeleteCandidate(null)}>
+              <Button onClick={() => setDeleteCandidate(null)}>
                 Cancelar
-              </button>
-              <button type="button" className={styles.deleteButton} onClick={confirmDelete}>
+              </Button>
+              <Button variant="danger" onClick={confirmDelete}>
                 Excluir
-              </button>
+              </Button>
             </div>
           </div>
         </div>
