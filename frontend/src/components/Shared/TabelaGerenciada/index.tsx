@@ -59,6 +59,13 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
     () => TabelaStorage.getByTabela(tabelaKey) || defaultVisibleColumns,
   );
 
+  const columnsByKey = useMemo(() => {
+    return Object.fromEntries(columns.map((column) => [column.key, column])) as Record<
+      string,
+      TabelaGerenciadaColuna<T>
+    >;
+  }, [columns]);
+
   const visibleColumns = useMemo(() => {
     const unique = Array.from(new Set(selectedColumns));
     return unique.filter((columnKey) => columns.some((column) => column.key === columnKey));
@@ -126,11 +133,13 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
   );
 
   const paginatedData = useMemo(() => {
+    if (usesServerPagination) return data;
+
     const startIndex = (safeCurrentPage - 1) * safeItensPorPagina;
     return data.slice(startIndex, startIndex + safeItensPorPagina);
-  }, [data, safeCurrentPage, safeItensPorPagina]);
+  }, [data, safeCurrentPage, safeItensPorPagina, usesServerPagination]);
 
-  const tableData = usesServerPagination ? data : paginatedData;
+  const tableData = paginatedData;
 
   const startItem = safeTotalItems === 0 ? 0 : (safeCurrentPage - 1) * safeItensPorPagina + 1;
   const endItem = Math.min(safeCurrentPage * safeItensPorPagina, safeTotalItems);
@@ -151,7 +160,7 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
           <thead>
             <tr>
               {visibleColumns.map((columnKey) => {
-                const column = columns.find((item) => item.key === columnKey);
+                const column = columnsByKey[columnKey];
                 return <th key={columnKey}>{column?.label || columnKey}</th>;
               })}
 
@@ -196,7 +205,7 @@ function TabelaGerenciada<T extends Record<string, unknown>>({
                 return (
                   <tr key={`${rowKey}-${rowIndex}`}>
                     {visibleColumns.map((columnKey) => {
-                      const column = columns.find((item) => item.key === columnKey);
+                      const column = columnsByKey[columnKey];
                       const rawValue = row[columnKey];
                       const value = column?.render
                         ? column.render(row)

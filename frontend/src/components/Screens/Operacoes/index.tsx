@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "react-toastify";
 import { IoEyeOutline, IoPlayOutline, IoTrashOutline } from "react-icons/io5";
@@ -25,6 +25,7 @@ function Operacoes() {
   const [isRunningAutomation, setIsRunningAutomation] = useState(false);
   const [lastRunAt, setLastRunAt] = useState<string | null>(null);
   const [deleteCandidate, setDeleteCandidate] = useState<TOperacao | null>(null);
+  const latestLoadRequestId = useRef(0);
 
   const selectedOperacao = useMemo(() => {
     if (!id) return null;
@@ -40,8 +41,12 @@ function Operacoes() {
   };
 
   const loadOperacoes = async (page: number) => {
+    const requestId = ++latestLoadRequestId.current;
+
     return OperacaoService.GetPaginated(page, ITEMS_PER_PAGE)
       .then((data) => {
+        if (requestId !== latestLoadRequestId.current) return;
+
         setOperacoes(data.items);
         setTotalOperacoes(data.total);
 
@@ -50,9 +55,11 @@ function Operacoes() {
         }
       })
       .catch((err) => {
+        if (requestId !== latestLoadRequestId.current) return;
         toast.error(err?.toString?.() || "Erro ao buscar operações.");
       })
       .finally(() => {
+        if (requestId !== latestLoadRequestId.current) return;
         setIsLoading(false);
       });
   };
@@ -64,21 +71,8 @@ function Operacoes() {
   };
 
   useEffect(() => {
-    let isMounted = true;
-
     loadOperacoes(currentPage).catch(() => undefined);
-
-    AutomacaoService.GetLastByNome("operacoesAtlassian")
-      .then((data) => {
-        if (isMounted) setLastRunAt(data?.criadoEm ?? null);
-      })
-      .catch(() => {
-        if (isMounted) setLastRunAt(null);
-      });
-
-    return () => {
-      isMounted = false;
-    };
+    loadLastAutomationRun().catch(() => undefined);
   }, [currentPage]);
 
   const runAutomation = async () => {

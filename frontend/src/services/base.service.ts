@@ -8,49 +8,32 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+function normalizeAxiosError(err: any): never {
+  throw err?.response?.data ?? err;
+}
+
+async function requestData<T>(request: Promise<{ data: T }>): Promise<T> {
+  return await request.then((res) => res.data).catch(normalizeAxiosError);
+}
+
 export default abstract class BaseService {
   protected static async get<T>(...args: Parameters<typeof api.get>): Promise<T> {
-    return await api
-      .get(...args)
-      .then((res) => res.data)
-      .catch((err) => {
-        throw err.response.data;
-      });
+    return await requestData(api.get<T>(...args));
   }
 
   protected static async post<T>(...args: Parameters<typeof api.post>): Promise<T> {
-    return await api
-      .post(...args)
-      .then((res) => res.data)
-      .catch((err) => {
-        throw err.response.data;
-      });
+    return await requestData(api.post<T>(...args));
   }
 
   protected static async put<T>(...args: Parameters<typeof api.put>): Promise<T> {
-    return await api
-      .put(...args)
-      .then((res) => res.data)
-      .catch((err) => {
-        throw err.response.data;
-      });
+    return await requestData(api.put<T>(...args));
   }
 
   protected static async patch<T>(...args: Parameters<typeof api.patch>): Promise<T> {
-    return await api
-      .patch(...args)
-      .then((res) => res.data)
-      .catch((err) => {
-        throw err.response.data;
-      });
+    return await requestData(api.patch<T>(...args));
   }
 
   protected static async delete<T>(...args: Parameters<typeof api.delete>): Promise<T> {
-    return await api
-      .delete(...args)
-      .then((res) => res.data)
-      .catch((err) => {
-        throw err.response.data;
-      });
+    return await requestData(api.delete<T>(...args));
   }
 }
