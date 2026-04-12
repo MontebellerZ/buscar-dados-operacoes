@@ -8,8 +8,12 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-function normalizeAxiosError(err: any): never {
-  throw err?.response?.data ?? err;
+function normalizeAxiosError(err: unknown): never {
+  if (axios.isAxiosError(err)) {
+    throw err.response?.data ?? err;
+  }
+
+  throw err;
 }
 
 async function requestData<T>(request: Promise<{ data: T }>): Promise<T> {
