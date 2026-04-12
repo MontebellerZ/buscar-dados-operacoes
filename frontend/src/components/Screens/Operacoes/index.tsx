@@ -10,9 +10,9 @@ import TabelaGerenciada from "../../Shared/TabelaGerenciada";
 import Button from "../../Shared/Button";
 import styles from "./styles.module.scss";
 import colunasTabelaOperacoes from "./colunasTabelaOperacoes";
+import Consts from "../../../config/consts";
 
 const TABLE_KEY = "operacoes";
-const ITEMS_PER_PAGE = 50;
 
 function Operacoes() {
   const navigate = useNavigate();
@@ -43,7 +43,7 @@ function Operacoes() {
   const loadOperacoes = async (page: number) => {
     const requestId = ++latestLoadRequestId.current;
 
-    return OperacaoService.GetPaginated(page, ITEMS_PER_PAGE)
+    return OperacaoService.GetPaginated(page, Consts.pageSize)
       .then((data) => {
         if (requestId !== latestLoadRequestId.current) return;
 
@@ -144,7 +144,7 @@ function Operacoes() {
         page={currentPage}
         totalItems={totalOperacoes}
         onPageChange={handlePageChange}
-        itensPorPagina={ITEMS_PER_PAGE}
+        itensPorPagina={Consts.pageSize}
         isLoading={isLoading}
         emptyMessage="Nenhuma operação encontrada."
         allowColumnEdit

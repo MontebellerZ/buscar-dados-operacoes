@@ -1,4 +1,5 @@
-import type { TOperacao, TOperacaoPaginada } from "../types/operacao.type";
+import type { TOperacao } from "../types/operacao.type";
+import type { TPaginacao } from "../types/paginacao.type";
 import BaseService from "./base.service";
 
 class OperacaoService extends BaseService {
@@ -6,8 +7,8 @@ class OperacaoService extends BaseService {
     return await this.get<TOperacao[]>("/operacao");
   }
 
-  static async GetPaginated(page: number, limit = 50) {
-    return await this.get<TOperacaoPaginada>("/operacao", {
+  static async GetPaginated(page: number, limit: number) {
+    return await this.get<TPaginacao<TOperacao>>("/operacao", {
       params: {
         page,
         limit,
