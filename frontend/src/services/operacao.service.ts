@@ -1,3 +1,4 @@
+import Consts from "../config/consts";
 import type { TOperacao } from "../types/operacao.type";
 import type { TPaginacao } from "../types/paginacao.type";
 import BaseService from "./base.service";
@@ -7,7 +8,7 @@ class OperacaoService extends BaseService {
     return await this.get<TOperacao[]>("/operacao");
   }
 
-  static async GetPaginated(page: number, limit: number) {
+  static async GetPaginated(page: number, limit: number = Consts.pageSize) {
     return await this.get<TPaginacao<TOperacao>>("/operacao", {
       params: {
         page,

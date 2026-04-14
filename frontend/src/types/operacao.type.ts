@@ -14,6 +14,6 @@ export type TOperacao = {
   freteLiquido?: number;
   taxaMotorista?: number;
   lucro?: number;
-  validado: number;
+  validado: boolean;
   ativo: number;
 };

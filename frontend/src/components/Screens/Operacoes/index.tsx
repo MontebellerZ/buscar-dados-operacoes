@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
-import { IoEyeOutline, IoPlayOutline, IoTrashOutline } from "react-icons/io5";
+import { IoEyeOutline, IoPlayOutline } from "react-icons/io5";
 import type { TOperacao } from "../../../types/operacao.type";
 import OperacaoService from "../../../services/operacao.service";
 import AutomacaoService from "../../../services/automacao.service";
 import { formatDateTime } from "../../../utils/formatters";
 import TabelaGerenciada from "../../Shared/TabelaGerenciada";
 import Button from "../../Shared/Button";
+import ModalOperacao from "../Operacao/ModalOperacao";
 import styles from "./styles.module.scss";
 import colunasTabelaOperacoes from "./colunasTabelaOperacoes";
 import Consts from "../../../config/consts";
@@ -15,44 +15,33 @@ import Consts from "../../../config/consts";
 const TABLE_KEY = "operacoes";
 
 function Operacoes() {
-  const navigate = useNavigate();
-  const { id } = useParams();
-
   const [operacoes, setOperacoes] = useState<TOperacao[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalOperacoes, setTotalOperacoes] = useState(0);
+  const [lastRunAt, setLastRunAt] = useState<string>();
+
   const [isLoading, setIsLoading] = useState(true);
   const [isRunningAutomation, setIsRunningAutomation] = useState(false);
-  const [lastRunAt, setLastRunAt] = useState<string | null>(null);
-  const [deleteCandidate, setDeleteCandidate] = useState<TOperacao | null>(null);
+
+  const [openedOperacao, setOpenedOperacao] = useState<TOperacao>();
   const latestLoadRequestId = useRef(0);
 
-  const selectedOperacao = useMemo(() => {
-    if (!id) return null;
-    const parsedId = Number(id);
-    if (!Number.isFinite(parsedId)) return null;
-    return operacoes.find((item) => item.id === parsedId) || null;
-  }, [id, operacoes]);
-
-  const loadLastAutomationRun = async () => {
+  const loadLastAutomationRun = useCallback(async () => {
     return AutomacaoService.GetLastByNome("operacoesAtlassian")
-      .then((data) => setLastRunAt(data?.criadoEm ?? null))
-      .catch(() => setLastRunAt(null));
-  };
+      .then((data) => setLastRunAt(data?.criadoEm))
+      .catch((err) => toast.error(err?.toString?.() || "Erro ao buscar a última execução."));
+  }, []);
 
-  const loadOperacoes = async (page: number) => {
+  const loadOperacoes = useCallback(async (page: number) => {
     const requestId = ++latestLoadRequestId.current;
 
-    return OperacaoService.GetPaginated(page, Consts.pageSize)
+    setIsLoading(true);
+
+    return OperacaoService.GetPaginated(page)
       .then((data) => {
         if (requestId !== latestLoadRequestId.current) return;
-
         setOperacoes(data.items);
         setTotalOperacoes(data.total);
-
-        if (data.page !== page) {
-          setCurrentPage(data.page);
-        }
       })
       .catch((err) => {
         if (requestId !== latestLoadRequestId.current) return;
@@ -62,48 +51,43 @@ function Operacoes() {
         if (requestId !== latestLoadRequestId.current) return;
         setIsLoading(false);
       });
-  };
+  }, []);
 
-  const handlePageChange = (page: number) => {
-    if (page === currentPage) return;
-    setIsLoading(true);
-    setCurrentPage(page);
-  };
+  const loadData = useCallback(
+    async (page: number) => {
+      await Promise.all([loadOperacoes(page), loadLastAutomationRun()]);
+    },
+    [loadLastAutomationRun, loadOperacoes],
+  );
 
-  useEffect(() => {
-    loadOperacoes(currentPage).catch(() => undefined);
-    loadLastAutomationRun().catch(() => undefined);
-  }, [currentPage]);
+  const handlePageChange = useCallback(
+    (page: number) => {
+      if (page === currentPage) return;
 
-  const runAutomation = async () => {
+      setCurrentPage(page);
+      loadData(page);
+    },
+    [currentPage, loadData],
+  );
+
+  const runAutomation = useCallback(async () => {
     setIsRunningAutomation(true);
 
     return AutomacaoService.OperacoesAtlassian()
       .then(() => {
         setIsLoading(true);
-        setCurrentPage(1);
         toast.success("Automação executada com sucesso.");
-        return Promise.all([loadOperacoes(1), loadLastAutomationRun()]);
+      })
+      .then(() => {
+        handlePageChange(1);
       })
       .catch((err) => toast.error(err?.toString?.() || "Erro ao executar automação."))
       .finally(() => setIsRunningAutomation(false));
-  };
+  }, [handlePageChange]);
 
-  const confirmDelete = async () => {
-    if (!deleteCandidate) return;
-
-    return OperacaoService.Delete(deleteCandidate.id)
-      .then(async () => {
-        setIsLoading(true);
-        await loadOperacoes(currentPage);
-        toast.success("Operação excluída com sucesso.");
-        if (selectedOperacao?.id === deleteCandidate.id) {
-          navigate("/main/operacoes");
-        }
-      })
-      .catch((err) => toast.error(err?.toString?.() || "Erro ao excluir operação."))
-      .finally(() => setDeleteCandidate(null));
-  };
+  useEffect(() => {
+    loadData(1);
+  }, [loadData]);
 
   return (
     <section className={styles.page}>
@@ -124,19 +108,6 @@ function Operacoes() {
         </div>
       </header>
 
-      {selectedOperacao && (
-        <article className={styles.detailCard}>
-          <div>
-            <h2>Operação {selectedOperacao.key}</h2>
-            <p>Cliente: {selectedOperacao.nomeCliente}</p>
-            <p>Motorista: {selectedOperacao.nomeMotorista}</p>
-            <p>Origem/Destino: {selectedOperacao.origemDestino}</p>
-          </div>
-
-          <Button onClick={() => navigate("/main/operacoes")}>Fechar detalhe</Button>
-        </article>
-      )}
-
       <TabelaGerenciada
         tabelaKey={TABLE_KEY}
         columns={colunasTabelaOperacoes}
@@ -150,40 +121,21 @@ function Operacoes() {
         allowColumnEdit
         renderActions={(operacao) => (
           <>
-            <Button
-              variant="icon"
-              title="Ver operação"
-              onClick={() => navigate(`/main/operacoes/${operacao.id}`)}
-            >
+            <Button variant="icon" title="Ver operação" onClick={() => setOpenedOperacao(operacao)}>
               <IoEyeOutline />
-            </Button>
-
-            <Button
-              variant="icon"
-              title="Excluir operação"
-              onClick={() => setDeleteCandidate(operacao)}
-            >
-              <IoTrashOutline />
             </Button>
           </>
         )}
       />
 
-      {deleteCandidate && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <h3>Confirmar exclusão</h3>
-            <p>
-              Deseja realmente excluir a operação <strong>{deleteCandidate.key}</strong>?
-            </p>
-            <div className={styles.modalActions}>
-              <Button onClick={() => setDeleteCandidate(null)}>Cancelar</Button>
-              <Button variant="danger" onClick={confirmDelete}>
-                Excluir
-              </Button>
-            </div>
-          </div>
-        </div>
+      {openedOperacao ? (
+        <ModalOperacao
+          operacao={openedOperacao}
+          onClose={() => setOpenedOperacao(undefined)}
+          onRefreshList={async () => loadData(currentPage)}
+        />
+      ) : (
+        <></>
       )}
     </section>
   );
